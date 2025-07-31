@@ -370,7 +370,12 @@ function initializeDefaultSchedule() {
     
     // Force update: Close Paša's Thursday 21:00-22:00 slot (override any existing data)
     if (appData.schedules[weekKey]?.thursday?.['21:00-22:00']) {
+        console.log('Force closing Thursday 21:00-22:00 slot');
+        console.log('Before:', appData.schedules[weekKey].thursday['21:00-22:00'].available);
         appData.schedules[weekKey].thursday['21:00-22:00'].available = false;
+        console.log('After:', appData.schedules[weekKey].thursday['21:00-22:00'].available);
+    } else {
+        console.log('Thursday 21:00-22:00 slot not found in schedule');
     }
 }
 
@@ -498,6 +503,16 @@ function renderTimeSlots(day, dayData) {
         const isPast = sessionDate < now;
         const isFull = session.players.length >= session.maxCapacity;
         const isAvailable = !isPast && session.players.length < session.maxCapacity && session.available;
+        
+        // Debug logging for Thursday 21:00-22:00
+        if (day === 'thursday' && timeSlot === '21:00-22:00') {
+            console.log('=== Thursday 21:00-22:00 Debug ===');
+            console.log('session.available:', session.available);
+            console.log('isPast:', isPast);
+            console.log('isFull:', isFull);
+            console.log('isAvailable:', isAvailable);
+            console.log('session object:', session);
+        }
         
         // Determine the CSS class
         let slotClass;
@@ -734,7 +749,10 @@ function renderApp() {
     
     // Force update: Close Paša's Thursday 21:00-22:00 slot (for all weeks)
     if (appData.schedules[weekKey]?.thursday?.['21:00-22:00']) {
+        console.log('renderApp: Force closing Thursday 21:00-22:00 slot');
         appData.schedules[weekKey].thursday['21:00-22:00'].available = false;
+    } else {
+        console.log('renderApp: Thursday 21:00-22:00 slot not found');
     }
     
     renderPlayers();
