@@ -367,6 +367,11 @@ function initializeDefaultSchedule() {
             }
         };
     }
+    
+    // Force update: Close Paša's Thursday 21:00-22:00 slot (override any existing data)
+    if (appData.schedules[weekKey]?.thursday?.['21:00-22:00']) {
+        appData.schedules[weekKey].thursday['21:00-22:00'].available = false;
+    }
 }
 
 // Rendering Functions
@@ -723,6 +728,11 @@ function renderApp() {
     const weekKey = getCurrentWeekKey();
     if (!appData.schedules[weekKey]) {
         initializeDefaultSchedule();
+    }
+    
+    // Force update: Close Paša's Thursday 21:00-22:00 slot (for all weeks)
+    if (appData.schedules[weekKey]?.thursday?.['21:00-22:00']) {
+        appData.schedules[weekKey].thursday['21:00-22:00'].available = false;
     }
     
     renderPlayers();
