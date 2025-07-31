@@ -13,8 +13,9 @@ Official member portal for Matchpoint Tennis Club in Riga, Latvia.
 
 ## 🚀 Access
 
-- **Website:** https://matchpoint.lv
-- **Password:** 30:Love
+**Website:** https://matchpoint.lv
+
+Password-protected member portal for registered Matchpoint Tennis Club members. Contact club administration for access credentials.
 
 ## 🏟️ Schedule
 
