@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matchpoint Tennis Club - Member Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <div class="login-header">
+            <div class="tennis-icon">🎾</div>
+            <h1 class="club-name">Matchpoint</h1>
+            <h2 class="club-subtitle">Tennis Club</h2>
+            <div class="club-location">Riga 2025 • Member Only</div>
+        </div>
+        <div class="login-content">
+            <input type="password" id="passwordInput" placeholder="Enter member password" />
+            <button onclick="login()">
+                <span class="button-icon">🏆</span>
+                Access Club
+            </button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle" title="Admin Panel">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Sidebar Panel -->
+        <div class="sidebar-panel" id="sidebarPanel">
+            <div class="sidebar-panel-header">
+                <h3>Admin Panel</h3>
+                <button class="btn secondary" onclick="toggleSidebar()">✕</button>
+            </div>
+            <div class="sidebar-panel-content">
+                <!-- Player Management Section -->
+                <div class="admin-section">
+                    <div class="admin-header">
+                        <h4>Player Management</h4>
+                        <button class="btn" onclick="showAddPlayerModal()">+ Add Player</button>
+                    </div>
+                    <div class="players-grid" id="playersGrid">
+                        <!-- Players will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <!-- Header -->
+                <div class="header">
+                    <h1>Tennis Club Schedule</h1>
+                    <div class="week-nav">
+                        <button onclick="changeWeek(-1)" id="prevWeek">← Previous</button>
+                        <span class="current-week" id="currentWeekText">This Week</span>
+                        <button onclick="changeWeek(1)" id="nextWeek">Next →</button>
+                    </div>
+                </div>
+
+                <!-- Announcement Banner -->
+                <div class="announcement-banner" id="announcementBanner">
+                    <div class="announcement-content">
+                        <div class="announcement-text">
+                            <div class="announcement-title">
+                                <span class="announcement-icon">🏆</span>
+                                Next up: Chef's Invitational
+                            </div>
+                            <div class="announcement-details">
+                                Sep 7 14:30 at RTU • Ladies and Men Singles Tournament
+                            </div>
+                        </div>
+                        <button class="announcement-close" onclick="closeBanner()" title="Close announcement">
+                            ×
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedule Grid -->
+                <div class="schedule-grid" id="scheduleGrid">
+                    <!-- Schedule will be populated here -->
+                </div>
+
+                <!-- Club Wall -->
+                <div class="club-wall">
+                    <div class="club-wall-header">
+                        <h2>💬 Club Wall</h2>
+                        <p>Share your thoughts with fellow club members</p>
+                    </div>
+                    
+                    <div class="wall-messages" id="wallMessages">
+                        <!-- Messages will be populated here -->
+                    </div>
+                    
+                    <div class="wall-input-section">
+                        <div class="wall-form">
+                            <input type="text" id="wallNickname" placeholder="Your name or nickname" maxlength="30" />
+                            <textarea id="wallMessage" placeholder="Share something with the club..." rows="3"></textarea>
+                            <button onclick="postClubMessage()" class="post-btn">
+                                <span>🎾</span>
+                                Post Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Player Modal -->
+    <div id="addPlayerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Player</h3>
+            </div>
+            <div class="form-group">
+                <label for="playerName">Player Name</label>
+                <input type="text" id="playerName" placeholder="Enter player name" />
+            </div>
+            <div class="form-group">
+                <label for="skillLevel">Skill Level</label>
+                <select id="skillLevel">
+                    <option value="beginner">Beginner (Yellow)</option>
+                    <option value="regular">Regular (Green)</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn secondary" onclick="hideAddPlayerModal()">Cancel</button>
+                <button class="btn" onclick="addPlayer()">Add Player</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div id="editPlayerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Player</h3>
+            </div>
+            <div class="form-group">
+                <label for="editPlayerName">Player Name</label>
+                <input type="text" id="editPlayerName" placeholder="Enter player name" />
+            </div>
+            <div class="form-group">
+                <label for="editSkillLevel">Skill Level</label>
+                <select id="editSkillLevel">
+                    <option value="beginner">Beginner (Yellow)</option>
+                    <option value="regular">Regular (Green)</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn secondary" onclick="hideEditPlayerModal()">Cancel</button>
+                <button class="btn" onclick="savePlayerEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bookingTitle">Book Training Session</h3>
+            </div>
+            <div class="form-group">
+                <label for="selectPlayer">Select Player</label>
+                <select id="selectPlayer">
+                    <!-- Options will be populated -->
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn secondary" onclick="hideBookingModal()">Cancel</button>
+                <button class="btn" onclick="confirmBooking()">Book Session</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
