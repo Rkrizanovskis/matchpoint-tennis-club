@@ -497,12 +497,14 @@ function renderTimeSlots(day, dayData) {
         
         const isPast = sessionDate < now;
         const isFull = session.players.length >= session.maxCapacity;
-        const isAvailable = !isPast && session.players.length < session.maxCapacity;
+        const isAvailable = !isPast && session.players.length < session.maxCapacity && session.available;
         
         // Determine the CSS class
         let slotClass;
         if (isPast) {
             slotClass = 'past';
+        } else if (!session.available) {
+            slotClass = 'unavailable';
         } else if (isFull) {
             slotClass = 'full';
         } else {
