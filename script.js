@@ -362,7 +362,7 @@ function initializeDefaultSchedule() {
                     skillLevel: 'mixed',
                     players: [],
                     maxCapacity: 5,
-                    available: true
+                    available: false
                 }
             }
         };
