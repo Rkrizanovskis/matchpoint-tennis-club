@@ -1,0 +1,224 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fnil\fcharset0 AppleColorEmoji;}
+{\colortbl;\red255\green255\blue255;\red249\green248\blue242;\red36\green36\blue35;}
+{\*\expandedcolortbl;;\cssrgb\c98039\c97647\c96078;\cssrgb\c18824\c18824\c18039;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww19200\viewh14560\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\
+# Matchpoint Tennis Club - Claude Context File\
+\
+## 
+\f1 \uc0\u55356 \u57278 
+\f0  Project Overview\
+This is the official scheduling system for Matchpoint Tennis Club in Riga, Latvia. A web application for member booking, schedule management, and club communication.\
+\
+## 
+\f1 \uc0\u55357 \u56513 
+\f0  Project Structure & Files\
+\
+\
+### Core Files\
+- **index.html** - Main HTML structure with login, schedule, admin panel, club wall\
+- **styles.css** - Complete styling with tennis theme, mobile responsive design\
+- **script.js** - All JavaScript functionality and data management\
+- **README.md** - Public GitHub documentation (password removed for security)\
+- **CNAME** - Domain configuration file (auto-created by GitHub)\
+\
+## 
+\f1 \uc0\u55356 \u57104 
+\f0  Deployment & Hosting\
+\
+### GitHub Repository\
+- **URL:** https://github.com/Rkrizanovskis/matchpoint-tennis-club\
+- **GitHub Pages:** https://rkrizanovskis.github.io/matchpoint-tennis-club\
+- **Custom Domain:** https://matchpoint.lv (DNS processing on nic.lv)\
+\
+### DNS Configuration\
+- **Provider:** nic.lv\
+- **Records Added:** 4 A records pointing to GitHub Pages IPs\
+- **Status:** DNS processing/propagating (can take 24-48 hours)\
+\
+### Workflow\
+1. Edit files in `/matchpoint-tennis-github/`\
+2. Test on localhost:3000\
+3. Git add/commit/push to GitHub\
+4. Changes automatically deploy to live site\
+\
+## 
+\f1 \uc0\u55357 \u56592 
+\f0  Authentication & Security\
+\
+### Login System\
+- **Password:** `30:Love` (tennis-themed)\
+- **Security:** Password NOT in public README (removed for security)\
+- **Access:** Single password for all club members\
+\
+### Function Names\
+- **IMPORTANT:** Use `postClubMessage()` not `postMessage()` (renamed to avoid browser conflicts)\
+\
+## 
+\f1 \uc0\u55356 \u57256 
+\f0  Design & Features\
+\
+### Tennis Theme\
+- **Colors:** Blue (#5A7AD9, #4F68CC) and Yellow (#FFBC4C, #FFB84D)\
+- **Branding:** "Matchpoint Tennis Club - Riga 2025 \'95 Member Only"\
+- **Icons:** Tennis ball (
+\f1 \uc0\u55356 \u57278 
+\f0 ), trophy (
+\f1 \uc0\u55356 \u57286 
+\f0 ), etc.\
+- **Cursors:** Custom crosshair (+) for clickable elements\
+\
+### Key Features Implemented\
+1. **Login Screen** - Tennis-themed with bouncing ball animation\
+2. **Weekly Schedule** - 4-day view (Mon-Thu) with time slots\
+3. **Player Management** - Add/edit/delete players with skill levels\
+4. **Booking System** - Click to book, capacity management (5 players max)\
+5. **Club Wall** - Community messaging with colored nicknames\
+6. **Admin Panel** - Sliding sidebar with player management\
+7. **Mobile Responsive** - Touch-friendly, swipe gestures\
+\
+## 
+\f1 \uc0\u55357 \u56561 
+\f0  Mobile Optimizations\
+- **Responsive design** with proper breakpoints\
+- **Touch targets** minimum 44px height\
+- **Swipe gestures** for week navigation\
+- **Mobile-specific layouts** and interactions\
+- **Optimized forms** and inputs\
+\
+## 
+\f1 \uc0\u55357 \u56421 
+\f0  Player & Schedule Data\
+\
+### Current Players (in appData.players)\
+**Monday:** Ri\uc0\u269 ards, Di\u257 na, Elza, Agnese, Arta, Ilvija\
+**Tuesday:** Aivars, L\uc0\u299 va, Kl\u257 vs, Agnese, Sintija, Krist\u299 ne, El\u299 za, Zelma  \
+**Wednesday:** Kar\uc0\u299 na, Rihards, Kristaps, Sam, Edgars, J\u257 nis\
+**Thursday:** J\uc0\u363 lija, D\u257 rta, Rita\
+\
+### Coaches\
+- **Pa\'9aa** - Monday, Wednesday, Thursday\
+- **Just\uc0\u299 ne** - Tuesday\
+\
+### Skill Levels\
+- **Beginner** - Yellow background (#FEFFC4)\
+- **Regular** - Green background (#E8F0FF)  \
+- **Mixed** - Combined sessions\
+\
+## 
+\f1 \uc0\u55357 \u56510 
+\f0  Data Storage\
+- **Method:** localStorage (browser-based)\
+- **Structure:** appData object with players, schedules, clubWallMessages\
+- **Persistence:** Auto-save on changes\
+- **Limitation:** Data stored locally per device\
+\
+## 
+\f1 \uc0\u55357 \u56615 
+\f0  Technical Details\
+\
+### Technology Stack\
+- **Frontend:** Vanilla HTML, CSS, JavaScript (no frameworks)\
+- **Hosting:** GitHub Pages\
+- **Domain:** Custom domain via DNS\
+- **Storage:** Browser localStorage\
+- **Server:** Python HTTP server for local development\
+\
+### Local Development\
+```bash\
+cd /Users/ricardskrizanovskis/matchpoint-tennis-github\
+python3 -m http.server 3000\
+# Access at http://localhost:3000\
+```\
+\
+### Git Workflow\
+```bash\
+git add .\
+git commit -m "Description of changes"\
+git push origin main\
+# Automatically deploys to GitHub Pages\
+```\
+\
+## 
+\f1 \uc0\u55356 \u57263 
+\f0  Current Status & Next Steps\
+\
+### Completed Features\
+
+\f1 \uc0\u9989 
+\f0  Complete tennis club scheduling system\
+
+\f1 \uc0\u9989 
+\f0  Mobile-responsive design\
+
+\f1 \uc0\u9989 
+\f0  GitHub Pages deployment\
+
+\f1 \uc0\u9989 
+\f0  Custom domain configuration (DNS processing)\
+
+\f1 \uc0\u9989 
+\f0  Security improvements (password removed from README)\
+
+\f1 \uc0\u9989 
+\f0  Club wall messaging system\
+
+\f1 \uc0\u9989 
+\f0  Admin panel with player management\
+\
+### DNS Status\
+
+\f1 \uc0\u55357 \u57313 
+\f0  **In Progress:** DNS records added to nic.lv, waiting for propagation\
+
+\f1 \uc0\u55357 \u57313 
+\f0  **Timeline:** 24-48 hours for full global DNS propagation\
+
+\f1 \uc0\u55357 \u57313 
+\f0  **Next:** Enable HTTPS once GitHub recognizes custom domain\
+\
+### Future Considerations\
+- Database migration (from localStorage to cloud storage)\
+- User authentication system\
+- Attendance tracking\
+- Payment integration\
+- Tournament management\
+\
+## 
+\f1 \uc0\u55357 \u56347 
+\f0  Known Issues & Solutions\
+\
+### Browser Compatibility\
+- **Custom cursors:** Work in modern browsers\
+- **localStorage:** Supported in all modern browsers\
+- **Mobile gestures:** Touch events for swipe navigation\
+\
+### Security Notes\
+- **Password in code:** Currently hardcoded, consider environment variables for production\
+- **No HTTPS locally:** Use HTTPS in production only\
+- **Public repository:** No sensitive data in GitHub (password removed from README)\
+\
+## 
+\f1 \uc0\u55357 \u56542 
+\f0  Contact & Usage\
+\
+### For Development\
+- **Primary folder:** `/Users/ricardskrizanovskis/matchpoint-tennis-github/`\
+- **Local server:** localhost:3000\
+- **GitHub:** Push changes trigger automatic deployment\
+\
+### For Club Members\
+- **Website:** https://matchpoint.lv (when DNS completes)\
+- **Temporary:** https://rkrizanovskis.github.io/matchpoint-tennis-club\
+- **Access:** Contact club administration for password\
+\
+---\
+\
+**Last Updated:** January 2025\
+**Claude Project:** Matchpoint Tennis Club Development\
+**Status:** Production-ready, DNS propagating}

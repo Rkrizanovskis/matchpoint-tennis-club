@@ -5,25 +5,12 @@ This is the official scheduling system for Matchpoint Tennis Club in Riga, Latvi
 
 ## 📁 Project Structure & Files
 
-### Current Working Directory
-**Main Folder:** `/Users/ricardskrizanovskis/matchpoint-tennis-github/`
-- This is the ONLY folder to work from (connected to GitHub)
-- Don't use `/tennis-club-scheduling/` anymore (old backup)
-
-### Core Application Files
+### Core Files
 - **index.html** - Main HTML structure with login, schedule, admin panel, club wall
 - **styles.css** - Complete styling with tennis theme, mobile responsive design
 - **script.js** - All JavaScript functionality and data management
-
-### Documentation & Configuration
 - **README.md** - Public GitHub documentation (password removed for security)
-- **CLAUDE_CONTEXT.md** - This file (main Claude context)
-- **docs/** - Documentation folder with detailed context files
-  - **ABOUT_APP_CONTEXT.md** - Comprehensive app details and features
-  - **PROJECT_FILES_LOCATION.md** - File structure and location guide
-  - **README.md** - Documentation index and navigation
 - **CNAME** - Domain configuration file (auto-created by GitHub)
-- **CNAME.backup** - Backup of domain configuration
 
 ## 🌐 Deployment & Hosting
 

@@ -3,6 +3,27 @@ let isAuthenticated = false;
 let currentWeekOffset = 0;
 let currentBookingSlot = null;
 
+// Function to determine initial week offset based on current day/time
+function getInitialWeekOffset() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    
+    // If Friday (5), Saturday (6), or Sunday (0) - show next week
+    if (day === 5 || day === 6 || day === 0) {
+        return 1; // Next week
+    }
+    
+    // If Thursday (4) after 20:30 (last session ends at 20:00 + 30 min buffer) - show next week
+    if (day === 4 && (hour > 20 || (hour === 20 && minute >= 30))) {
+        return 1; // Next week
+    }
+    
+    // Otherwise show current week
+    return 0;
+}
+
 // Data Storage
 let appData = {
     players: [
@@ -795,6 +816,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize app
     loadData();
+    
+    // Set initial week offset based on current day/time
+    currentWeekOffset = getInitialWeekOffset();
     
     // Add swipe gesture support for mobile week navigation
     let touchStartX = 0;
