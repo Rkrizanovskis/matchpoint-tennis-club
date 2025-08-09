@@ -112,6 +112,7 @@ body {
     z-index: 999;
     transition: left 0.3s ease;
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .sidebar-panel.open {
@@ -135,6 +136,34 @@ body {
 
 .sidebar-panel-content {
     padding: 24px;
+}
+
+/* Mobile sidebar panel content adjustments */
+@media (max-width: 768px) {
+    .sidebar-panel-content {
+        padding: 16px;
+    }
+    
+    .admin-section {
+        margin-bottom: 24px;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .admin-header h4 {
+        font-size: 18px;
+        margin-bottom: 0;
+    }
+    
+    .admin-header .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+    }
 }
 
 .admin-section {
@@ -204,7 +233,6 @@ body {
     .sidebar-panel.open ~ .main-content {
         display: none;
     }
-}
 }
 
 /* Header - Force correct layout */
@@ -920,6 +948,14 @@ body {
     gap: 12px;
 }
 
+/* Mobile player grid fix */
+@media (max-width: 768px) {
+    .players-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
 .player-card {
     background: #f8fafc;
     padding: 16px;
@@ -930,6 +966,15 @@ body {
     align-items: center;
     transition: all 0.2s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-width: 0; /* Important for flex items */
+}
+
+/* Mobile player card adjustments */
+@media (max-width: 768px) {
+    .player-card {
+        padding: 12px;
+        gap: 8px;
+    }
 }
 
 .player-card:hover {
@@ -952,11 +997,38 @@ body {
     color: #2d3748;
     flex-grow: 1;
     margin-right: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0; /* This is important for flex items to allow text truncation */
+}
+
+/* Mobile player name adjustments */
+@media (max-width: 768px) {
+    .player-name {
+        font-size: 14px;
+        max-width: calc(100% - 80px); /* Account for action buttons */
+    }
 }
 
 .player-actions {
     display: flex;
     gap: 8px;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+/* Mobile player actions adjustments */
+@media (max-width: 768px) {
+    .player-actions {
+        gap: 4px;
+    }
+    
+    .player-actions button {
+        padding: 8px;
+        min-width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
 }
 
 .player-actions button {
@@ -1144,6 +1216,16 @@ body {
         font-size: 16px;
         font-weight: 600;
         margin: 0 8px;
+    }
+
+    /* Fix for sidebar panel on mobile */
+    .sidebar-panel {
+        width: calc(100vw - 50px); /* Account for sidebar width */
+        max-width: 100%;
+    }
+    
+    .sidebar-panel.open {
+        left: 50px; /* Align with sidebar width on mobile */
     }
 
     .players-grid {
