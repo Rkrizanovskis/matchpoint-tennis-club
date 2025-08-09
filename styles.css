@@ -43,9 +43,19 @@ select {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: #ffffff; /* White background */
     color: #2d3748;
     line-height: 1.6;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Ensure login form appears above grid */
+.login-form {
+    position: relative;
+    z-index: 10;
+    isolation: isolate; /* Create new stacking context */
 }
 
 /* Sidebar */
@@ -342,7 +352,7 @@ body {
 
 /* Login Form */
 .login-form {
-    background: linear-gradient(145deg, #ffffff 0%, #f8fffe 100%);
+    background: #ffffff; /* Solid white background - no transparency */
     border-radius: 24px;
     padding: 0;
     max-width: 480px;
@@ -355,6 +365,18 @@ body {
     text-align: center;
     overflow: hidden;
     position: relative;
+    z-index: 10;
+    isolation: isolate;
+    /* Remove backdrop blur and transparency */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    /* Keep the subtle floating animation */
+    animation: formFloat 6s ease-in-out infinite;
+}
+
+@keyframes formFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 /* Mobile login form adjustments */
@@ -1510,4 +1532,35 @@ canvas {
     z-index: 9999 !important;
     width: 100% !important;
     height: 100% !important;
+}/* Additional styles to ensure login form is opaque and above grid */
+.login-form {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    opacity: 1 !important;
+    z-index: 100 !important;
+    position: relative !important;
+    isolation: isolate !important;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%) !important;
+    opacity: 1 !important;
+}
+
+.login-content {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Ensure the main app is also above the grid when logged in */
+#mainApp {
+    position: relative;
+    z-index: 10;
+    background-color: transparent;
+}
+
+/* Fix z-index layering */
+body > canvas {
+    z-index: -1 !important;
+    position: fixed !important;
 }
