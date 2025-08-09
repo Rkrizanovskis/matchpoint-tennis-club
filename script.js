@@ -196,6 +196,18 @@ function addPlayer() {
     hideAddPlayerModal();
     renderPlayers();
     saveData();
+    
+    // Trigger confetti effect after adding player
+    setTimeout(() => {
+        if (typeof triggerConfetti !== 'undefined') {
+            triggerConfetti('playerAdded');
+            // Optional: Add a more elaborate effect for special occasions
+            if (appData.players.length % 10 === 0) {
+                // Every 10th player gets fireworks!
+                setTimeout(() => triggerFireworks(), 500);
+            }
+        }
+    }, 100);
 }
 function deletePlayer(playerId) {
     if (confirm('Are you sure you want to delete this player?')) {
@@ -296,6 +308,36 @@ function confirmBooking() {
     hideBookingModal();
     renderSchedule();
     saveData();
+    
+    // Trigger confetti effect for successful booking
+    setTimeout(() => {
+        if (typeof triggerConfetti !== 'undefined') {
+            // Get the player's name for a personalized celebration
+            const player = appData.players.find(p => p.id === playerId);
+            if (player) {
+                // Trigger confetti from the center with booking success theme
+                triggerConfetti('bookingSuccess');
+                
+                // If it's their first booking this week, add extra celebration
+                const weekBookings = Object.values(appData.schedules[weekKey] || {})
+                    .flatMap(day => Object.values(day))
+                    .filter(session => session.players.includes(playerId));
+                
+                if (weekBookings.length === 1) {
+                    setTimeout(() => triggerConfetti('sideBurst'), 300);
+                }
+                
+                // If the session is now full, trigger club pride effect
+                if (session.players.length === session.maxCapacity) {
+                    setTimeout(() => {
+                        if (typeof triggerClubPride !== 'undefined') {
+                            triggerClubPride();
+                        }
+                    }, 800);
+                }
+            }
+        }
+    }, 100);
 }
 
 // Handle remove player with proper event handling
@@ -636,6 +678,11 @@ function postClubMessage() {
         const originalText = postBtn.innerHTML;
         postBtn.innerHTML = '<span>✅</span> Posted!';
         postBtn.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+        
+        // Trigger a small confetti burst from the button
+        if (typeof triggerConfettiFromElement !== 'undefined') {
+            triggerConfettiFromElement(postBtn, 'bookingSuccess');
+        }
         
         setTimeout(() => {
             postBtn.innerHTML = originalText;

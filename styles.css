@@ -1500,3 +1500,14 @@ body {
         max-height: 400px;
     }
 }
+
+/* Confetti Canvas Styling */
+canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    width: 100% !important;
+    height: 100% !important;
+}

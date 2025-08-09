@@ -10,6 +10,7 @@ Official member portal for Matchpoint Tennis Club in Riga, Latvia.
 - **Skill Level Management** - Separate beginner and regular player groups
 - **Mobile Responsive** - Works perfectly on phones and tablets
 - **Admin Panel** - Player management and schedule administration
+- **🎉 Confetti Celebrations** - Celebratory effects for new players and bookings
 
 ## 🚀 Access
 
@@ -30,6 +31,7 @@ Password-protected member portal for registered Matchpoint Tennis Club members. 
 - No frameworks or dependencies
 - Local storage for data persistence
 - Mobile-first responsive design
+- Canvas-confetti library for celebrations (loaded from CDN)
 
 ## 📱 Mobile Features
 

@@ -50,7 +50,10 @@
                 <div class="admin-section">
                     <div class="admin-header">
                         <h4>Player Management</h4>
-                        <button class="btn" onclick="showAddPlayerModal()">+ Add Player</button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="font-size: 12px; opacity: 0.7;">🎉 Confetti enabled</span>
+                            <button class="btn" onclick="showAddPlayerModal()">+ Add Player</button>
+                        </div>
                     </div>
                     <div class="players-grid" id="playersGrid">
                         <!-- Players will be populated here -->
@@ -188,6 +191,7 @@
         </div>
     </div>
 
+    <script src="js/confetti.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
