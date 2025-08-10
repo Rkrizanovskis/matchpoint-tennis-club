@@ -109,7 +109,7 @@ function changeWeek(direction) {
         currentWeekOffset = newOffset;
         
         // Reinitialize schedule listener for the new week
-        initializeScheduleListener();();
+        initializeScheduleListener();
         
         renderApp();
     }
