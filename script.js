@@ -256,6 +256,10 @@ function showBookingModal(day, timeSlot) {
     const playerSelect = document.getElementById('selectPlayer');
     playerSelect.innerHTML = '';
     
+    // Debug: Log players array
+    console.log('Available players:', appData.players);
+    console.log('Diana player object:', appData.players.find(p => p.name === 'Diāna'));
+    
     // Filter players by skill level - but allow same player multiple times
     const eligiblePlayers = appData.players.filter(player => {
         if (session.skillLevel === 'mixed') return true;
@@ -987,11 +991,57 @@ auth.onAuthStateChanged((user) => {
 async function loadPlayersFromFirebase() {
     try {
         const snapshot = await db.collection('players').get();
-        appData.players = [];
         
-        snapshot.forEach((doc) => {
-            appData.players.push({ id: doc.id, ...doc.data() });
-        });
+        if (snapshot.empty) {
+            console.log('No players in Firebase, initializing default players...');
+            // Initialize default players in Firebase
+            const defaultPlayers = [
+                // Monday rotating players
+                { id: 'richards', name: 'Ričards', skillLevel: 'regular' },
+                { id: 'diana', name: 'Diāna', skillLevel: 'regular' },
+                { id: 'elza', name: 'Elza', skillLevel: 'regular' },
+                { id: 'agnese', name: 'Agnese', skillLevel: 'regular' },
+                { id: 'arta', name: 'Arta', skillLevel: 'regular' },
+                { id: 'ilvija', name: 'Ilvija', skillLevel: 'beginner' },
+                
+                // Tuesday players
+                { id: 'aivars', name: 'Aivars', skillLevel: 'regular' },
+                { id: 'liva', name: 'Līva', skillLevel: 'regular' },
+                { id: 'klavs', name: 'Klāvs', skillLevel: 'regular' },
+                { id: 'agnese2', name: 'Agnese', skillLevel: 'regular' },
+                
+                // Wednesday players
+                { id: 'karina', name: 'Karina', skillLevel: 'regular' },
+                { id: 'rihards', name: 'Rihards', skillLevel: 'regular' },
+                { id: 'kristaps', name: 'Kristaps', skillLevel: 'regular' },
+                
+                // Thursday players
+                { id: 'julija', name: 'Jūlija', skillLevel: 'beginner' },
+                { id: 'darta', name: 'Dārta', skillLevel: 'beginner' },
+                { id: 'rita', name: 'Rita', skillLevel: 'beginner' }
+            ];
+            
+            // Add all default players to Firebase
+            const batch = db.batch();
+            defaultPlayers.forEach(player => {
+                const docRef = db.collection('players').doc(player.id);
+                batch.set(docRef, {
+                    name: player.name,
+                    skillLevel: player.skillLevel,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+            await batch.commit();
+            console.log('Default players initialized in Firebase');
+            
+            // Set local data
+            appData.players = defaultPlayers;
+        } else {
+            appData.players = [];
+            snapshot.forEach((doc) => {
+                appData.players.push({ id: doc.id, ...doc.data() });
+            });
+        }
         
         // Sort players alphabetically
         appData.players.sort((a, b) => a.name.localeCompare(b.name));
