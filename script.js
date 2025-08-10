@@ -964,7 +964,7 @@ auth.onAuthStateChanged((user) => {
         if (isAuthenticated) {
             initializeFirebaseListeners();
             // Initialize schedule listener for current week
-            initializeScheduleListener();();
+            initializeScheduleListener();
             
             // Check if we need to initialize schedules in Firebase
             const weekKey = getCurrentWeekKey();
