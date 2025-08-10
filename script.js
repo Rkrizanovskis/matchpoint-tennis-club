@@ -71,8 +71,15 @@ function login() {
         isAuthenticated = true;
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
-        initializeDefaultSchedule();
-        renderApp();
+        
+        // Initialize Firebase listeners for real-time updates
+        initializeFirebaseListeners();
+        
+        // Load players from Firebase after successful login
+        loadPlayersFromFirebase().then(() => {
+            initializeDefaultSchedule();
+            renderApp();
+        });
     } else {
         errorDiv.textContent = 'Incorrect password. Please try again.';
     }
@@ -100,6 +107,10 @@ function changeWeek(direction) {
     const newOffset = currentWeekOffset + direction;
     if (newOffset >= -1 && newOffset <= 4) {
         currentWeekOffset = newOffset;
+        
+        // Reinitialize schedule listener for the new week
+        initializeScheduleListener();
+        
         renderApp();
     }
 }
@@ -168,16 +179,13 @@ function savePlayerEdit() {
         return;
     }
 
-    const player = appData.players.find(p => p.id === currentEditingPlayerId);
-    if (player) {
-        player.name = newName;
-        player.skillLevel = newSkillLevel;
-        
-        hideEditPlayerModal();
-        renderPlayers();
-        renderSchedule();
-        saveData();
-    }
+    // Update in Firebase
+    updatePlayerInFirebase(currentEditingPlayerId, {
+        name: newName,
+        skillLevel: newSkillLevel
+    });
+    
+    hideEditPlayerModal();
 }
 
 function addPlayer() {
@@ -192,10 +200,13 @@ function addPlayer() {
         skillLevel: skillLevel
     };
     
-    appData.players.push(newPlayer);
+    // Add to Firebase instead of local array
+    addPlayerToFirebase(newPlayer);
     hideAddPlayerModal();
-    renderPlayers();
-    saveData();
+    
+    // Clear the form
+    document.getElementById('playerName').value = '';
+    document.getElementById('skillLevel').value = 'regular';
     
     // Trigger confetti effect after adding player
     setTimeout(() => {
@@ -211,9 +222,10 @@ function addPlayer() {
 }
 function deletePlayer(playerId) {
     if (confirm('Are you sure you want to delete this player?')) {
-        appData.players = appData.players.filter(p => p.id !== playerId);
+        // Delete from Firebase
+        deletePlayerFromFirebase(playerId);
         
-        // Remove from all schedules
+        // Remove from all schedules (this will be migrated to Firebase later)
         Object.keys(appData.schedules).forEach(weekKey => {
             Object.keys(appData.schedules[weekKey]).forEach(day => {
                 Object.keys(appData.schedules[weekKey][day]).forEach(slot => {
@@ -275,7 +287,7 @@ function hideBookingModal() {
     currentBookingSlot = null;
 }
 
-function confirmBooking() {
+async function confirmBooking() {
     if (!currentBookingSlot) return;
     
     const playerId = document.getElementById('selectPlayer').value;
@@ -303,11 +315,25 @@ function confirmBooking() {
         if (session.players.length >= session.maxCapacity) {
             session.available = false;
         }
+        
+        // Save to Firebase
+        try {
+            await saveScheduleToFirebase(day, timeSlot, session);
+        } catch (error) {
+            // Remove player from local data if Firebase save failed
+            const index = session.players.indexOf(playerId);
+            if (index > -1) {
+                session.players.splice(index, 1);
+                session.available = session.players.length < session.maxCapacity;
+            }
+            alert('Error booking slot. Please try again.');
+            return;
+        }
     }
     
     hideBookingModal();
     renderSchedule();
-    saveData();
+    // saveData(); // No longer needed - Firebase handles persistence
     
     // Trigger confetti effect for successful booking
     setTimeout(() => {
@@ -341,7 +367,7 @@ function confirmBooking() {
 }
 
 // Handle remove player with proper event handling
-function handleRemovePlayer(day, timeSlot, playerId, playerIndex) {
+async function handleRemovePlayer(day, timeSlot, playerId, playerIndex) {
     event.stopPropagation(); // Prevent slot click
     
     const weekKey = getCurrentWeekKey();
@@ -350,6 +376,9 @@ function handleRemovePlayer(day, timeSlot, playerId, playerIndex) {
     if (!session) {
         return;
     }
+    
+    // Store original state in case we need to revert
+    const originalPlayers = [...session.players];
     
     // Check if playerIndex is valid
     if (typeof playerIndex === 'number' && playerIndex >= 0 && playerIndex < session.players.length) {
@@ -363,8 +392,17 @@ function handleRemovePlayer(day, timeSlot, playerId, playerIndex) {
     
     session.available = true;
     
-    renderSchedule();
-    saveData();
+    // Save to Firebase
+    try {
+        await saveScheduleToFirebase(day, timeSlot, session);
+        renderSchedule();
+    } catch (error) {
+        // Revert changes if Firebase save failed
+        session.players = originalPlayers;
+        session.available = session.players.length < session.maxCapacity;
+        alert('Error removing player. Please try again.');
+        console.error('Error removing player from Firebase:', error);
+    }
 }
 // Initialize default schedule
 function initializeDefaultSchedule() {
@@ -864,6 +902,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize app
     loadData();
     
+    // Don't load default players - they will come from Firebase
+    appData.players = [];
+    
     // Set initial week offset based on current day/time
     currentWeekOffset = getInitialWeekOffset();
     
@@ -912,3 +953,256 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// ========== FIREBASE MIGRATION: PLAYERS ==========
+
+// Initialize Firebase listeners after authentication
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        console.log('User authenticated, Firebase ready');
+        // Only initialize listeners if user has logged in with tennis club password
+        if (isAuthenticated) {
+            initializeFirebaseListeners();
+            // Initialize schedule listener for current week
+            initializeScheduleListener();
+            
+            // Check if we need to initialize schedules in Firebase
+            const weekKey = getCurrentWeekKey();
+            db.collection('schedules')
+                .where('date', '>=', formatDateForId(getWeekStartDate(currentWeekOffset)))
+                .where('date', '<=', formatDateForId(getWeekEndDate(currentWeekOffset)))
+                .limit(1)
+                .get()
+                .then((snapshot) => {
+                    if (snapshot.empty && appData.schedules[weekKey]) {
+                        console.log('No schedules in Firebase for current week, initializing...');
+                        initializeSchedulesInFirebase();
+                    }
+                });
+        }
+    }
+});
+
+// Load players from Firebase
+async function loadPlayersFromFirebase() {
+    try {
+        const snapshot = await db.collection('players').get();
+        appData.players = [];
+        
+        snapshot.forEach((doc) => {
+            appData.players.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort players alphabetically
+        appData.players.sort((a, b) => a.name.localeCompare(b.name));
+        
+        console.log('Loaded players from Firebase:', appData.players.length);
+        
+        // Refresh UI if we're on the main page
+        if (isAuthenticated) {
+            renderSchedule();
+            renderPlayers();
+        }
+    } catch (error) {
+        console.error('Error loading players from Firebase:', error);
+    }
+}
+
+// Listen for real-time updates to players
+function initializeFirebaseListeners() {
+    // Listen for player changes
+    db.collection('players').onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            const playerData = { id: change.doc.id, ...change.doc.data() };
+            
+            if (change.type === 'added') {
+                // Check if player already exists locally
+                const existingIndex = appData.players.findIndex(p => p.id === playerData.id);
+                if (existingIndex === -1) {
+                    appData.players.push(playerData);
+                    console.log('Player added:', playerData.name);
+                }
+            }
+            
+            if (change.type === 'modified') {
+                const index = appData.players.findIndex(p => p.id === playerData.id);
+                if (index !== -1) {
+                    appData.players[index] = playerData;
+                    console.log('Player modified:', playerData.name);
+                }
+            }
+            
+            if (change.type === 'removed') {
+                appData.players = appData.players.filter(p => p.id !== change.doc.id);
+                console.log('Player removed:', change.doc.id);
+            }
+        });
+        
+        // Sort players and update UI
+        appData.players.sort((a, b) => a.name.localeCompare(b.name));
+        if (isAuthenticated) {
+            renderPlayers();
+            renderSchedule();
+        }
+    });
+}
+
+// Override the saveData function to use Firebase for players
+const originalSaveData = saveData;
+function saveData() {
+    // Still save to localStorage for now (for schedules and messages)
+    originalSaveData();
+}
+
+// Add player to Firebase
+async function addPlayerToFirebase(player) {
+    try {
+        await db.collection('players').doc(player.id).set({
+            name: player.name,
+            skillLevel: player.skillLevel,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('Player added to Firebase:', player.name);
+    } catch (error) {
+        console.error('Error adding player to Firebase:', error);
+        alert('Error adding player. Please try again.');
+    }
+}
+
+// Update player in Firebase
+async function updatePlayerInFirebase(playerId, updates) {
+    try {
+        await db.collection('players').doc(playerId).update({
+            ...updates,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('Player updated in Firebase:', playerId);
+    } catch (error) {
+        console.error('Error updating player in Firebase:', error);
+        alert('Error updating player. Please try again.');
+    }
+}
+
+// Delete player from Firebase
+async function deletePlayerFromFirebase(playerId) {
+    try {
+        await db.collection('players').doc(playerId).delete();
+        console.log('Player deleted from Firebase:', playerId);
+    } catch (error) {
+        console.error('Error deleting player from Firebase:', error);
+        alert('Error deleting player. Please try again.');
+    }
+}
+
+// ========== FIREBASE SCHEDULE FUNCTIONS ==========
+
+// Initialize schedule listener
+function initializeScheduleListener() {
+    if (!auth.currentUser) {
+        console.log('User not authenticated yet, skipping schedule listener');
+        return;
+    }
+
+    // Get the current week's date range
+    const weekStart = getWeekStartDate(currentWeekOffset);
+    const weekEnd = getWeekEndDate(currentWeekOffset);
+    
+    // Listen to schedules for the current week
+    db.collection('schedules')
+        .where('date', '>=', formatDateForId(weekStart))
+        .where('date', '<=', formatDateForId(weekEnd))
+        .onSnapshot((snapshot) => {
+            const weekKey = getCurrentWeekKey();
+            
+            // Initialize the week's schedule if it doesn't exist
+            if (!appData.schedules[weekKey]) {
+                initializeDefaultSchedule();
+            }
+            
+            snapshot.docChanges().forEach((change) => {
+                const data = change.doc.data();
+                const sessionId = change.doc.id;
+                
+                if (change.type === 'modified' || change.type === 'added') {
+                    // Update local data with Firebase data
+                    if (!appData.schedules[weekKey][data.day]) {
+                        appData.schedules[weekKey][data.day] = {};
+                    }
+                    
+                    appData.schedules[weekKey][data.day][data.time] = {
+                        ...appData.schedules[weekKey][data.day][data.time],
+                        players: data.players || [],
+                        available: data.players ? data.players.length < 4 : true,
+                        locked: data.locked || false
+                    };
+                }
+                
+                if (change.type === 'removed') {
+                    // Handle removed sessions if needed
+                    if (appData.schedules[weekKey][data.day]) {
+                        if (appData.schedules[weekKey][data.day][data.time]) {
+                            appData.schedules[weekKey][data.day][data.time].players = [];
+                            appData.schedules[weekKey][data.day][data.time].available = true;
+                        }
+                    }
+                }
+            });
+            
+            renderSchedule();
+        }, (error) => {
+            console.error('Error listening to schedule changes:', error);
+        });
+}
+
+// Save schedule session to Firebase
+async function saveScheduleToFirebase(day, timeSlot, sessionData) {
+    try {
+        const weekKey = getCurrentWeekKey();
+        const monday = getWeekStartDate(currentWeekOffset);
+        const dayIndex = ['monday', 'tuesday', 'wednesday', 'thursday'].indexOf(day);
+        const sessionDate = new Date(monday);
+        sessionDate.setDate(monday.getDate() + dayIndex);
+        
+        const sessionId = getSessionId(formatDateForId(sessionDate), day, timeSlot);
+        
+        await db.collection('schedules').doc(sessionId).set({
+            date: formatDateForId(sessionDate),
+            day: day,
+            time: timeSlot,
+            players: sessionData.players || [],
+            locked: sessionData.locked || false,
+            coach: sessionData.coach,
+            maxCapacity: sessionData.maxCapacity,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('Schedule saved to Firebase:', sessionId);
+    } catch (error) {
+        console.error('Error saving schedule to Firebase:', error);
+        throw error;
+    }
+}
+
+// Initialize schedules in Firebase for current week
+async function initializeSchedulesInFirebase() {
+    try {
+        const weekKey = getCurrentWeekKey();
+        const scheduleData = appData.schedules[weekKey];
+        
+        if (!scheduleData) {
+            console.log('No schedule data to initialize');
+            return;
+        }
+        
+        for (const day of Object.keys(scheduleData)) {
+            for (const timeSlot of Object.keys(scheduleData[day])) {
+                const session = scheduleData[day][timeSlot];
+                await saveScheduleToFirebase(day, timeSlot, session);
+            }
+        }
+        
+        console.log('Schedules initialized in Firebase');
+    } catch (error) {
+        console.error('Error initializing schedules in Firebase:', error);
+    }
+}
