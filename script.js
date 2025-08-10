@@ -109,7 +109,7 @@ function changeWeek(direction) {
         currentWeekOffset = newOffset;
         
         // Reinitialize schedule listener for the new week
-        initializeScheduleListener();
+        initializeScheduleListener();();
         
         renderApp();
     }
@@ -964,7 +964,7 @@ auth.onAuthStateChanged((user) => {
         if (isAuthenticated) {
             initializeFirebaseListeners();
             // Initialize schedule listener for current week
-            initializeScheduleListener();
+            initializeScheduleListener();();
             
             // Check if we need to initialize schedules in Firebase
             const weekKey = getCurrentWeekKey();
@@ -1129,10 +1129,13 @@ function initializeScheduleListener() {
                         appData.schedules[weekKey][data.day] = {};
                     }
                     
+                    // Preserve existing session data and update with Firebase data
+                    const existingSession = appData.schedules[weekKey][data.day][data.time] || {};
                     appData.schedules[weekKey][data.day][data.time] = {
-                        ...appData.schedules[weekKey][data.day][data.time],
+                        coach: data.coach || existingSession.coach,
+                        maxCapacity: data.maxCapacity || existingSession.maxCapacity || 4,
                         players: data.players || [],
-                        available: data.players ? data.players.length < 4 : true,
+                        available: (data.players || []).length < (data.maxCapacity || existingSession.maxCapacity || 4),
                         locked: data.locked || false
                     };
                 }
