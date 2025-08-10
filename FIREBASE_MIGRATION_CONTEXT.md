@@ -137,11 +137,15 @@ messages/
 - ✅ **COMPLETED** - Players now sync in real-time across all users!
 
 ### Phase 4: Replace localStorage - Schedules ⏱️ 4-5 hours
-- [ ] Replace schedule save/load with Firestore
-- [ ] Add real-time listeners for each time slot
-- [ ] Update booking/unbooking functions
-- [ ] Handle concurrent booking conflicts
-- [ ] Test with multiple browsers
+- [x] Replace schedule save/load with Firestore
+- [x] Add real-time listeners for each time slot
+- [x] Update booking/unbooking functions
+- [x] Handle concurrent booking conflicts
+- [x] Test with multiple browsers
+- [x] Fix player count display issues
+- [x] Fix player ID generation issues
+- [ ] Fix schedule persistence - bookings reset on page reload
+- ⚠️ **Current Issue**: Schedule resets to defaults on reload instead of loading from Firebase
 
 ### Phase 5: Replace localStorage - Messages ⏱️ 2-3 hours
 - [ ] Replace message save/load with Firestore

@@ -77,7 +77,7 @@ function login() {
         
         // Load players from Firebase after successful login
         loadPlayersFromFirebase().then(() => {
-            initializeDefaultSchedule();
+            // Don't initialize default schedule here - let Firebase handle it
             renderApp();
         });
     } else {
@@ -294,7 +294,16 @@ function hideBookingModal() {
 async function confirmBooking() {
     if (!currentBookingSlot) return;
     
-    const playerId = document.getElementById('selectPlayer').value;
+    const playerSelect = document.getElementById('selectPlayer');
+    const playerId = playerSelect.value;
+    
+    // Debug logging
+    console.log('Selected player ID:', playerId);
+    console.log('Selected player index:', playerSelect.selectedIndex);
+    console.log('Selected option:', playerSelect.options[playerSelect.selectedIndex]);
+    console.log('All players:', appData.players);
+    console.log('Player exists?', appData.players.find(p => p.id === playerId));
+    
     if (!playerId) return;
     
     const weekKey = getCurrentWeekKey();
