@@ -1133,10 +1133,12 @@ function initializeScheduleListener() {
                     const existingSession = appData.schedules[weekKey][data.day][data.time] || {};
                     appData.schedules[weekKey][data.day][data.time] = {
                         coach: data.coach || existingSession.coach,
-                        maxCapacity: data.maxCapacity || existingSession.maxCapacity || 4,
+                        maxCapacity: data.maxCapacity || existingSession.maxCapacity || 5,
                         players: data.players || [],
-                        available: (data.players || []).length < (data.maxCapacity || existingSession.maxCapacity || 4),
-                        locked: data.locked || false
+                        available: (data.players || []).length < (data.maxCapacity || existingSession.maxCapacity || 5),
+                        locked: data.locked || false,
+                        skillLevel: existingSession.skillLevel || 'mixed',
+                        isRotating: existingSession.isRotating || false
                     };
                 }
                 
