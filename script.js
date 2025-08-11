@@ -418,6 +418,7 @@ async function handleRemovePlayer(day, timeSlot, playerId, playerIndex) {
     }
 }
 // Initialize default schedule
+// Initialize default schedule structure (without players - they come from Firebase)
 function initializeDefaultSchedule() {
     const weekKey = getCurrentWeekKey();
     if (!appData.schedules[weekKey]) {
@@ -426,7 +427,7 @@ function initializeDefaultSchedule() {
                 '20:00-21:00': {
                     coach: 'Paša',
                     skillLevel: 'mixed',
-                    players: ['richards', 'diana'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
                     isRotating: true,
                     available: true
@@ -436,29 +437,30 @@ function initializeDefaultSchedule() {
                 '19:00-20:00': {
                     coach: 'Justīne',
                     skillLevel: 'mixed',
-                    players: ['aivars', 'liva', 'agnese2', 'klavs'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
                     available: true
                 },
                 '20:00-21:00': {
                     coach: 'Justīne',
                     skillLevel: 'beginner',
-                    players: ['sintija', 'ilvija', 'kristine', 'eliza', 'zelma'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
-                    available: false
+                    available: true
                 }
             },
             wednesday: {
                 '19:00-20:00': {
                     coach: 'Paša',
                     skillLevel: 'mixed',
-                    players: ['karina', 'rihards', 'elza', 'kristaps'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
                     available: true
-                },                '20:00-21:00': {
+                },
+                '20:00-21:00': {
                     coach: 'Paša',
                     skillLevel: 'mixed',
-                    players: ['arta', 'sam', 'edgars', 'janis'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
                     available: true
                 }
@@ -467,16 +469,16 @@ function initializeDefaultSchedule() {
                 '20:00-21:00': {
                     coach: 'Paša',
                     skillLevel: 'mixed',
-                    players: ['julija', 'sintija', 'zelma', 'darta', 'rita'],
+                    players: [], // Will be populated from Firebase
                     maxCapacity: 5,
-                    available: false
+                    available: true
                 },
                 '21:00-22:00': {
                     coach: 'Paša',
                     skillLevel: 'mixed',
                     players: [],
                     maxCapacity: 5,
-                    available: false
+                    available: false // This slot is always closed
                 }
             }
         };
@@ -994,12 +996,9 @@ auth.onAuthStateChanged((user) => {
                         initializeDefaultSchedule();
                         initializeSchedulesInFirebase();
                     } else {
-                        console.log('Schedules found in Firebase, loading...');
-                        // Create empty structure for Firebase data to populate
-                        if (!appData.schedules[weekKey]) {
-                            appData.schedules[weekKey] = {};
-                        }
+                        console.log('Schedules exist in Firebase, will load from there');
                     }
+                });
                 });
         }
     }
@@ -1268,9 +1267,39 @@ async function initializeSchedulesInFirebase() {
             return;
         }
         
+        // Check if this is the first time (no schedules in Firebase yet)
+        const existingSchedules = await db.collection('schedules')
+            .where('date', '>=', formatDateForId(getWeekStartDate(currentWeekOffset)))
+            .where('date', '<=', formatDateForId(getWeekEndDate(currentWeekOffset)))
+            .limit(1)
+            .get();
+        
+        const isFirstTime = existingSchedules.empty;
+        
         for (const day of Object.keys(scheduleData)) {
             for (const timeSlot of Object.keys(scheduleData[day])) {
                 const session = scheduleData[day][timeSlot];
+                
+                // Only add default players on first initialization
+                if (isFirstTime) {
+                    // Set default players based on day and time
+                    if (day === 'monday' && timeSlot === '20:00-21:00') {
+                        session.players = ['richards', 'diana'];
+                    } else if (day === 'tuesday' && timeSlot === '19:00-20:00') {
+                        session.players = ['aivars', 'liva', 'agnese2', 'klavs'];
+                    } else if (day === 'tuesday' && timeSlot === '20:00-21:00') {
+                        session.players = ['sintija', 'ilvija', 'kristine', 'eliza', 'zelma'];
+                        session.available = false;
+                    } else if (day === 'wednesday' && timeSlot === '19:00-20:00') {
+                        session.players = ['karina', 'rihards', 'elza', 'kristaps'];
+                    } else if (day === 'wednesday' && timeSlot === '20:00-21:00') {
+                        session.players = ['arta', 'sam', 'edgars', 'janis'];
+                    } else if (day === 'thursday' && timeSlot === '20:00-21:00') {
+                        session.players = ['julija', 'sintija', 'zelma', 'darta', 'rita'];
+                        session.available = false;
+                    }
+                }
+                
                 await saveScheduleToFirebase(day, timeSlot, session);
             }
         }
