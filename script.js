@@ -848,7 +848,8 @@ function renderApp() {
     // Ensure current week schedule exists
     const weekKey = getCurrentWeekKey();
     if (!appData.schedules[weekKey]) {
-        initializeDefaultSchedule();
+        // Don't initialize defaults here - let Firebase populate the data
+        appData.schedules[weekKey] = {};
     }
     
     // Force update: Close Paša's Thursday 21:00-22:00 slot (for all weeks)
@@ -987,9 +988,17 @@ auth.onAuthStateChanged((user) => {
                 .limit(1)
                 .get()
                 .then((snapshot) => {
-                    if (snapshot.empty && appData.schedules[weekKey]) {
-                        console.log('No schedules in Firebase for current week, initializing...');
+                    if (snapshot.empty) {
+                        console.log('No schedules in Firebase for current week, initializing defaults...');
+                        // Only initialize with defaults if Firebase is empty
+                        initializeDefaultSchedule();
                         initializeSchedulesInFirebase();
+                    } else {
+                        console.log('Schedules found in Firebase, loading...');
+                        // Create empty structure for Firebase data to populate
+                        if (!appData.schedules[weekKey]) {
+                            appData.schedules[weekKey] = {};
+                        }
                     }
                 });
         }
@@ -1175,7 +1184,8 @@ function initializeScheduleListener() {
             
             // Initialize the week's schedule if it doesn't exist
             if (!appData.schedules[weekKey]) {
-                initializeDefaultSchedule();
+                // Create empty schedule structure without default players
+                appData.schedules[weekKey] = {};
             }
             
             snapshot.docChanges().forEach((change) => {
