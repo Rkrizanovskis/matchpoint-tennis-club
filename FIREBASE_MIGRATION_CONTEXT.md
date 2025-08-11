@@ -4,35 +4,31 @@
 
 ### To Continue This Migration:
 1. **Open this context file**: `/Users/ricardskrizanovskis/matchpoint-tennis-github/FIREBASE_MIGRATION_CONTEXT.md`
-2. **Use this prompt**: "I want to continue the Firebase migration for my tennis app. We've completed migrating the players list to Firebase. Next, we need to migrate the schedules. The context is in FIREBASE_MIGRATION_CONTEXT.md"
-3. **Current Status**: Players list is fully migrated and working with real-time sync
-4. **Next Task**: Migrate schedules/bookings to Firebase (Phase 4)
+2. **Use this prompt**: "I want to continue the Firebase migration for my tennis app. We've completed migrating the players list and schedules to Firebase. Next, we need to migrate the club wall messages. The context is in FIREBASE_MIGRATION_CONTEXT.md"
+3. **Current Status**: Players and schedules are fully migrated with real-time sync
+4. **Next Task**: Migrate club wall messages to Firebase (Phase 5)
 
 ### What's Working Now:
 - ✅ Firebase connected and authenticated
-- ✅ Players stored in Firestore
-- ✅ Real-time sync for player additions/edits/deletions
-- ✅ Multiple users see same data instantly
-- 🚧 Schedules migration to Firebase IN PROGRESS
+- ✅ Players stored in Firestore with real-time sync
+- ✅ Multiple users see same player data instantly
+- ✅ Schedules stored in Firestore with real-time sync
+- ✅ Bookings persist across page reloads
+- ✅ Multiple users see same schedule updates instantly
 - ⏳ Club wall messages still using localStorage
-
-### Current Work (January 2025):
-- Added Firebase schedule functions:
-  - `initializeScheduleListener()` - Sets up real-time listeners for current week
-  - `saveScheduleToFirebase()` - Saves individual schedule sessions
-  - `initializeSchedulesInFirebase()` - Migrates existing schedules to Firebase
-- Updated booking functions:
-  - `confirmBooking()` - Now saves to Firebase
-  - `handleRemovePlayer()` - Now updates Firebase
-  - `changeWeek()` - Reinitializes listeners for new week
-- Next: Test the schedule migration
 
 ### Server Command:
 ```bash
-cd /Users/ricardskrizanovskis/matchpoint-tennis-github && python3 -m http.server 8000
-# Access at: http://localhost:8000
+cd /Users/ricardskrizanovskis/matchpoint-tennis-github && python3 -m http.server 8001
+# Access at: http://localhost:8001
 # Password: 30:Love
 ```
+
+### Current Work (August 2025):
+- Completed Phase 3: Player migration
+- Completed Phase 4: Schedule migration
+- Fixed all persistence issues
+- Ready for Phase 5: Club wall messages
 
 ---
 
@@ -144,8 +140,8 @@ messages/
 - [x] Test with multiple browsers
 - [x] Fix player count display issues
 - [x] Fix player ID generation issues
-- [ ] Fix schedule persistence - bookings reset on page reload
-- ⚠️ **Current Issue**: Schedule resets to defaults on reload instead of loading from Firebase
+- [x] Fix schedule persistence - bookings now persist on reload
+- ✅ **COMPLETED** - Schedules now sync in real-time and persist correctly!
 
 ### Phase 5: Replace localStorage - Messages ⏱️ 2-3 hours
 - [ ] Replace message save/load with Firestore
@@ -170,65 +166,44 @@ messages/
 
 ## 🔑 Key Code Changes
 
-### 1. Initialize Firebase (in index.html)
-```html
-<!-- Add before closing </body> tag -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="script.js"></script>
-```
+### Recent Fixes (Phase 4 - Schedules):
 
-### 2. Firebase Configuration (firebase-config.js)
+1. **Fixed Schedule Persistence** (in `script.js`):
 ```javascript
-// Your Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+// initializeDefaultSchedule() now creates empty structure
+// Players array is empty - populated from Firebase
+players: [], // Will be populated from Firebase
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-```
-
-### 3. Replace localStorage Functions
-```javascript
-// OLD: localStorage
-function saveData() {
-    localStorage.setItem('tennisClubData', JSON.stringify(appData));
-}
-
-// NEW: Firestore
-async function saveSchedule(sessionId, sessionData) {
-    await db.collection('schedules').doc(sessionId).set({
-        ...sessionData,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-    });
+// Only adds default players on very first run
+if (isFirstTime) {
+    // Set default players based on day and time
+    if (day === 'monday' && timeSlot === '20:00-21:00') {
+        session.players = ['richards', 'diana'];
+    }
+    // ... etc
 }
 ```
 
-### 4. Add Real-time Listeners
+2. **Fixed Player ID Issues**:
+- Cleaned up duplicate players with timestamp IDs
+- Ensured dropdown shows only correct player IDs
+- Fixed booking to use existing player IDs, not create new ones
+
+3. **Fixed Player Count Display**:
+- Updated Firebase listener to preserve all session fields
+- Ensured `maxCapacity` field is maintained (default: 5)
+
+### Key Functions Added:
+
 ```javascript
-// Listen for schedule changes
-function listenToScheduleChanges() {
-    db.collection('schedules')
-      .where('date', '>=', getMonday(currentWeekOffset))
-      .where('date', '<=', getThursday(currentWeekOffset))
-      .onSnapshot((snapshot) => {
-          snapshot.docChanges().forEach((change) => {
-              if (change.type === 'modified' || change.type === 'added') {
-                  updateScheduleUI(change.doc.id, change.doc.data());
-              }
-          });
-      });
-}
+// Schedule-specific functions
+initializeScheduleListener() // Real-time listener for current week
+saveScheduleToFirebase() // Saves individual sessions
+initializeSchedulesInFirebase() // First-time setup with defaults
+
+// Updated booking functions
+async function confirmBooking() // Now saves to Firebase
+async function handleRemovePlayer() // Updates Firebase
 ```
 
 ## 🛡️ Firebase Security Rules
@@ -353,32 +328,36 @@ git push origin main
 ---
 
 **Context File Created:** January 2025  
-**Purpose:** Track Firebase migration progress across Claude sessions## 📝 Session Summary - January 2025
+**Purpose:** Track Firebase migration progress across Claude sessions## 📝 Session Summary - August 2025
 
 ### What We Accomplished Today:
-1. **Set up Firebase Project**
-   - Created project: matchpoint-e5b00
-   - Enabled Firestore database
-   - Enabled anonymous authentication
-   - Added Firebase SDK to the app
+1. **Completed Schedule Migration to Firebase**
+   - Fixed player count display issues
+   - Fixed player ID generation (no more timestamps)
+   - Fixed schedule persistence across reloads
+   - Tested real-time sync between browsers
 
-2. **Migrated Players to Firebase**
-   - Replaced localStorage with Firestore for players
-   - Implemented real-time listeners
-   - Fixed syntax errors and connection issues
-   - Tested and confirmed real-time sync works
+2. **Key Issues Resolved:**
+   - Players with timestamp IDs (diana_1754769049885) - cleaned up
+   - Schedule resetting to defaults on reload - fixed
+   - Player counts showing incorrectly - fixed
+   - Booking not persisting - fixed
 
 3. **Files Modified:**
-   - `index.html` - Added Firebase SDKs
-   - `firebase-config.js` - Created with Firebase configuration
-   - `script.js` - Added Firebase functions for players
+   - `script.js` - Major updates for schedule Firebase integration
+   - `firebase-config.js` - Added helper functions
+   - `FIREBASE_MIGRATION_CONTEXT.md` - Updated progress
 
 ### Known Issues:
-- None currently - players sync perfectly!
+- None currently - players and schedules fully functional!
 
 ### Time Spent:
-- Phase 1 (Firebase Setup): ~1 hour
 - Phase 3 (Players Migration): ~2 hours
-- Total: ~3 hours
+- Phase 4 (Schedule Migration): ~4 hours
+- Total Project Time: ~6 hours
+
+### Ready for Next Phase:
+- Phase 5: Club Wall Messages migration
+- Estimated: 2-3 hours
 
 ---
