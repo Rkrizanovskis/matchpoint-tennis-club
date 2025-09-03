@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Matchpoint Tennis Club - Member Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <div class="login-header">
+            <div class="tennis-icon">🎾</div>
+            <h1 class="club-name">Matchpoint</h1>
+            <h2 class="club-subtitle">Tennis Club</h2>
+            <div class="club-location">Riga 2025 • Member Only</div>
+        </div>
+        <div class="login-content">
+            <input type="password" id="passwordInput" placeholder="Enter member password" />
+            <button onclick="login()">
+                <span class="button-icon">🏆</span>
+                Access Club
+            </button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display: none;">
+        <div style="padding: 20px; text-align: center;">
+            <h1>🎾 Welcome to Matchpoint Tennis Club!</h1>
+            <p><strong>Login successful!</strong></p>
+            <p>This is the clean version that should work perfectly.</p>
+            <button onclick="logout()" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px;">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Inline script to avoid caching issues -->
+    <script>
+        console.log('=== MATCHPOINT TENNIS CLUB LOGIN ===');
+        
+        let isAuthenticated = false;
+        
+        function login() {
+            console.log('Login function called');
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            console.log('Password entered:', password);
+            
+            if (password === '30:Love') {
+                console.log('✅ Password correct - logging in');
+                isAuthenticated = true;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                errorDiv.textContent = '';
+            } else {
+                console.log('❌ Login failed - incorrect password');
+                errorDiv.textContent = 'Incorrect password. Please try again.';
+            }
+        }
+        
+        function logout() {
+            console.log('Logging out...');
+            isAuthenticated = false;
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+        
+        // Enter key support
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - setting up event listeners');
+            
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        login();
+                    }
+                });
+            }
+        });
+        
+        console.log('Script loaded successfully - ready for login');
+    </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+/* Beautiful Tennis Club Modal Styles */
+
+/* Override the basic modal with tennis club styling */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 55, 72, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 
+        0 20px 60px rgba(90, 122, 217, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Beautiful header with tennis club branding */
+.modal-header {
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+    color: white;
+    padding: 24px 28px 20px;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%);
+    background-size: 20px 20px;
+    animation: slidePattern 20s linear infinite;
+}
+
+@keyframes slidePattern {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(0); }
+}
+
+.modal-header h3 {
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h3::before {
+    content: '🎾';
+    font-size: 20px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 2;
+}
+
+.close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+}
+
+.close:active {
+    transform: scale(0.95);
+}
+
+/* Modal body styling */
+.modal-body {
+    padding: 28px;
+}
+
+.slot-details h4 {
+    color: #2d3748;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 2px solid #0ea5e9;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e8f4f8;
+    border-radius: 12px;
+    font-size: 16px;
+    background: #f8fffe;
+    color: #2d3748;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #5A7AD9;
+    box-shadow: 0 0 0 4px rgba(90, 122, 217, 0.1);
+    background: white;
+}
+
+/* Current players section */
+.current-players h5 {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.current-players-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.current-players-list .player-tag {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.current-players-list .player-tag.beginner {
+    background: linear-gradient(135deg, #FEFFC4 0%, #FFF8B8 100%);
+    color: #4A3300;
+    border-color: rgba(255, 222, 99, 0.3);
+}
+
+.current-players-list .player-tag.regular {
+    background: linear-gradient(135deg, #E8F0FF 0%, #DCE7FF 100%);
+    color: #1E3A8A;
+    border-color: rgba(121, 158, 255, 0.3);
+}
+
+/* Modal footer */
+.modal-footer {
+    padding: 0 28px 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-footer .btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+}
+
+.modal-footer .btn.secondary {
+    background: #f8fafc;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+}
+
+.modal-footer .btn.secondary:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.modal-footer .btn:not(.secondary) {
+    background: linear-gradient(135deg, #FFBC4C 0%, #FFB84D 100%);
+    color: #2d3748;
+    box-shadow: 0 4px 16px rgba(255, 188, 76, 0.3);
+}
+
+.modal-footer .btn:not(.secondary):hover {
+    background: linear-gradient(135deg, #FFB84D 0%, #FFBC4C 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 188, 76, 0.4);
+}
+
+.modal-footer .btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px;
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        padding: 20px 24px 16px;
+    }
+    
+    .modal-header h3 {
+        font-size: 20px;
+    }
+    
+    .modal-body {
+        padding: 24px 20px;
+    }
+    
+    .modal-footer {
+        padding: 0 20px 20px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 16px 24px;
+        min-width: auto;
+    }
+    
+    .form-group select {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 16px 18px;
+    }
+}

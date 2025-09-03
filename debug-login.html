@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Login - Matchpoint Tennis Club</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        input, button { padding: 10px; margin: 5px; }
+        #status { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Debug Login Test</h1>
+    
+    <div class="debug">
+        <h3>Login Test</h3>
+        <input type="password" id="passwordInput" placeholder="Enter password: 30:Love">
+        <button onclick="testLogin()">Test Login</button>
+        <div id="status"></div>
+    </div>
+
+    <div class="debug">
+        <h3>Console Logs</h3>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // Override console.log to display on page
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            document.getElementById('logs').innerHTML += '<div>LOG: ' + args.join(' ') + '</div>';
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            document.getElementById('logs').innerHTML += '<div style="color:red;">ERROR: ' + args.join(' ') + '</div>';
+        };
+
+        function testLogin() {
+            const password = document.getElementById('passwordInput').value;
+            const status = document.getElementById('status');
+            
+            console.log('Testing login with password:', password);
+            console.log('Expected password: 30:Love');
+            console.log('Password match:', password === '30:Love');
+            
+            if (password === '30:Love') {
+                status.innerHTML = '<span style="color: green;">✅ LOGIN SUCCESS!</span>';
+                console.log('Login would succeed');
+            } else {
+                status.innerHTML = '<span style="color: red;">❌ LOGIN FAILED</span>';
+                console.log('Login failed - password mismatch');
+            }
+        }
+        
+        // Test on page load
+        console.log('Debug page loaded');
+        console.log('Testing basic JavaScript functionality');
+    </script>
+</body>
+</html>

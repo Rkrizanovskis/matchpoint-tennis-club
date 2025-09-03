@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matchpoint Tennis Club - Member Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <div class="login-header">
+            <div class="tennis-icon">🎾</div>
+            <h1 class="club-name">Matchpoint</h1>
+            <h2 class="club-subtitle">Tennis Club</h2>
+            <div class="club-location">Riga 2025 • Member Only</div>
+        </div>
+        <div class="login-content">
+            <input type="password" id="passwordInput" placeholder="Enter member password" />
+            <button onclick="login()">
+                <span class="button-icon">🏆</span>
+                Access Club
+            </button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display: none;">
+        <!-- Content will be populated by JavaScript -->
+    </div>
+
+    <!-- Load working script only -->
+    <script src="working-login.js"></script>
+</body>
+</html>

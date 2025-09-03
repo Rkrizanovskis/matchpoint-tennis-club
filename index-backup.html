@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matchpoint Tennis Club - Member Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <div class="login-header">
+            <div class="tennis-icon">🎾</div>
+            <h1 class="club-name">Matchpoint</h1>
+            <h2 class="club-subtitle">Tennis Club</h2>
+            <div class="club-location">Riga 2025 • Member Only</div>
+        </div>
+        <div class="login-content">
+            <input type="password" id="passwordInput" placeholder="Enter member password" />
+            <button onclick="tempLogin()">
+                <span class="button-icon">🏆</span>
+                Access Club (Debug Mode)
+            </button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display: none;">
+        <h1>🎾 Matchpoint Tennis Club - Debug Mode</h1>
+        <p><strong>Login successful!</strong> This is a simplified version to test the login functionality.</p>
+        
+        <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>🔧 Debug Information:</h3>
+            <p>✅ Password verification working</p>
+            <p>✅ DOM manipulation working</p>
+            <p>✅ CSS styles loading correctly</p>
+            <p>⚠️ Firebase functionality disabled for testing</p>
+        </div>
+        
+        <button onclick="tempLogout()" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+            Logout & Test Again
+        </button>
+    </div>
+
+    <script>
+        console.log('=== MATCHPOINT DEBUG MODE ===');
+        
+        function tempLogin() {
+            console.log('tempLogin() called');
+            
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            console.log('Password entered:', `"${password}"`);
+            console.log('Expected password:', `"30:Love"`);
+            console.log('Match result:', password === '30:Love');
+            
+            if (password === '30:Love') {
+                console.log('✅ Login successful - showing main app');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                errorDiv.textContent = '';
+            } else {
+                console.log('❌ Login failed - showing error');
+                errorDiv.textContent = 'Incorrect password. Please try again.';
+                errorDiv.style.color = '#dc3545';
+                errorDiv.style.background = '#ffe6e6';
+                errorDiv.style.padding = '10px';
+                errorDiv.style.borderRadius = '4px';
+                errorDiv.style.marginTop = '10px';
+            }
+        }
+        
+        function tempLogout() {
+            console.log('tempLogout() called');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+        
+        // Allow Enter key to login
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - setting up event listeners');
+            
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                console.log('Password input found, adding Enter key listener');
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        console.log('Enter key pressed, calling tempLogin()');
+                        tempLogin();
+                    }
+                });
+            } else {
+                console.error('Password input not found!');
+            }
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>

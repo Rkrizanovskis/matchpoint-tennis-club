@@ -64,23 +64,39 @@ let appData = {
 
 // Authentication
 function login() {
+    console.log('Login function called');
     const password = document.getElementById('passwordInput').value;
     const errorDiv = document.getElementById('loginError');
     
+    console.log('Password entered:', password);
+    console.log('Expected password: 30:Love');
+    
     if (password === '30:Love') {
+        console.log('Password correct - logging in');
         isAuthenticated = true;
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         
-        // Initialize Firebase listeners for real-time updates
-        initializeFirebaseListeners();
-        
-        // Load players from Firebase after successful login
-        loadPlayersFromFirebase().then(() => {
-            // Don't initialize default schedule here - let Firebase handle it
+        try {
+            // Initialize Firebase listeners for real-time updates
+            initializeFirebaseListeners();
+            
+            // Load players from Firebase after successful login
+            loadPlayersFromFirebase().then(() => {
+                // Don't initialize default schedule here - let Firebase handle it
+                renderApp();
+            }).catch((error) => {
+                console.error('Error loading from Firebase:', error);
+                // Still render app even if Firebase fails
+                renderApp();
+            });
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            // Still render app even if Firebase fails
             renderApp();
-        });
+        }
     } else {
+        console.log('Login failed - incorrect password');
         errorDiv.textContent = 'Incorrect password. Please try again.';
     }
 }
@@ -998,7 +1014,6 @@ auth.onAuthStateChanged((user) => {
                     } else {
                         console.log('Schedules exist in Firebase, will load from there');
                     }
-                });
                 });
         }
     }

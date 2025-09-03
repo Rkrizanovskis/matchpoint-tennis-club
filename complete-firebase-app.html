@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Matchpoint Tennis Club - Member Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <div class="login-header">
+            <div class="tennis-icon">🎾</div>
+            <h1 class="club-name">Matchpoint</h1>
+            <h2 class="club-subtitle">Tennis Club</h2>
+            <div class="club-location">Riga 2025 • Member Only</div>
+        </div>
+        <div class="login-content">
+            <input type="password" id="passwordInput" placeholder="Enter member password" />
+            <button onclick="login()">
+                <span class="button-icon">🏆</span>
+                Access Club
+            </button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle" title="Admin Panel">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="app-title">🎾 Matchpoint Tennis Club</h1>
+                <div class="week-navigation">
+                    <button onclick="changeWeek(-1)" class="btn secondary">← Previous Week</button>
+                    <span id="currentWeekDisplay">This Week</span>
+                    <button onclick="changeWeek(1)" class="btn secondary">Next Week →</button>
+                </div>
+            </div>
+
+            <!-- Schedule Grid -->
+            <div id="scheduleGrid" class="schedule-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Club Wall -->
+            <div class="club-wall">
+                <h3>🏆 Club Wall</h3>
+                <div class="message-input">
+                    <input type="text" id="wallNickname" placeholder="Your name" />
+                    <input type="text" id="wallMessage" placeholder="Share your tennis thoughts..." />
+                    <button onclick="postClubMessage()">Post</button>
+                </div>
+                <div id="wallMessages" class="wall-messages">
+                    <!-- Messages will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel -->
+        <div class="sidebar-panel" id="sidebarPanel">
+            <div class="sidebar-panel-header">
+                <h3>Admin Panel</h3>
+                <button class="btn secondary" onclick="toggleSidebar()">✕</button>
+            </div>
+            <div class="sidebar-panel-content">
+                <!-- Player Management Section -->
+                <div class="admin-section">
+                    <h4>👥 Player Management</h4>
+                    <div class="add-player-form">
+                        <input type="text" id="newPlayerName" placeholder="Player name" />
+                        <select id="newPlayerSkill">
+                            <option value="regular">Regular</option>
+                            <option value="beginner">Beginner</option>
+                        </select>
+                        <button onclick="addPlayer()" class="btn">Add Player</button>
+                    </div>
+                    <div id="playersList" class="players-list">
+                        <!-- Players will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Book Training Session</h3>
+                <button class="modal-close" onclick="hideBookingModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="bookingDetails"></div>
+                <div class="form-group">
+                    <label>Select Player:</label>
+                    <select id="playerSelect">
+                        <!-- Players will be populated here -->
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn secondary" onclick="hideBookingModal()">Cancel</button>
+                <button class="btn" onclick="confirmBooking()">Book Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Confetti Effect -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="js/confetti.js"></script>
+    
+    <!-- Load the complete working script with Firebase -->
+    <script src="working-script.js"></script>
+</body>
+</html>

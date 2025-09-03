@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+        input, button { padding: 15px; font-size: 16px; margin: 10px; }
+        .form { background: #f0f8ff; padding: 30px; border-radius: 10px; display: inline-block; }
+        .app { display: none; background: #e6ffe6; padding: 30px; border-radius: 10px; }
+        .error { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="loginForm" class="form">
+        <h2>🎾 Matchpoint Login Test</h2>
+        <input type="password" id="passwordInput" placeholder="Password: 30:Love">
+        <br>
+        <button onclick="doLogin()">Login</button>
+        <div id="error" class="error"></div>
+    </div>
+    
+    <div id="mainApp" class="app">
+        <h2>✅ Login Successful!</h2>
+        <p>You are now logged into the tennis club system.</p>
+        <button onclick="doLogout()">Logout</button>
+    </div>
+
+    <script>
+        function doLogin() {
+            const pwd = document.getElementById('passwordInput').value;
+            const err = document.getElementById('error');
+            
+            console.log('Attempting login with:', pwd);
+            
+            if (pwd === '30:Love') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                err.textContent = '';
+                console.log('Login successful');
+            } else {
+                err.textContent = 'Wrong password. Try: 30:Love';
+                console.log('Login failed');
+            }
+        }
+        
+        function doLogout() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+        
+        // Enter key support
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+        
+        console.log('Minimal test page loaded');
+    </script>
+</body>
+</html>

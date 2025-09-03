@@ -8,7 +8,6 @@
     <meta http-equiv="Expires" content="0">
     <title>Matchpoint Tennis Club - Member Portal</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="modal-styles.css">
     
     <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -39,7 +38,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle" title="Admin Panel">
-                <svg viewBox="0 0 24 24">                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -89,7 +89,9 @@
                         <span class="current-week" id="currentWeek">Loading...</span>
                         <button onclick="changeWeek(1)" id="nextWeekBtn">Next →</button>
                     </div>
-                </div>                <!-- Announcement Banner -->
+                </div>
+
+                <!-- Announcement Banner -->
                 <div id="announcementBanner" class="announcement-banner" style="display: none;">
                     <div class="announcement-content">
                         <div class="announcement-text">
@@ -123,7 +125,8 @@
             <div class="modal-body">
                 <div id="slotDetails" class="slot-details">
                     <!-- Slot details will be shown here -->
-                </div>                <div class="form-group">
+                </div>
+                <div class="form-group">
                     <label for="playerSelect">Select Player:</label>
                     <select id="playerSelect">
                         <option value="">Choose a player...</option>
@@ -144,6 +147,6 @@
     <script src="firebase-config.js"></script>
     
     <!-- Main Script -->
-    <script src="script-fixed.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
