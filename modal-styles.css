@@ -12,6 +12,21 @@
     backdrop-filter: blur(4px);
     z-index: 2000;
     animation: modalFadeIn 0.3s ease-out;
+    /* Always center the modal content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal[style*="display: none"] {
+    display: none !important;
+}
+
+.modal[style*="display: flex"], 
+.modal[style*="display: block"] {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes modalFadeIn {
@@ -23,12 +38,6 @@
         opacity: 1;
         backdrop-filter: blur(4px);
     }
-}
-
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .modal-content {
