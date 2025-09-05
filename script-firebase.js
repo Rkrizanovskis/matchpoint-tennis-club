@@ -1475,11 +1475,17 @@ function closePlayerModal() {
     // Clear form
     document.getElementById('playerName').value = '';
     document.getElementById('playerSkillLevel').value = '';
+    
+    // Reset modal to "Add Player" mode
+    document.getElementById('playerModalTitle').textContent = 'Add Player';
+    document.getElementById('savePlayerBtn').textContent = 'Add Player';
 }
 
-async async function savePlayer() {
+async function savePlayer() {
     const name = document.getElementById('playerName').value.trim();
     const skillLevel = document.getElementById('playerSkillLevel').value;
+    
+    console.log('🎾 Saving player:', { name, skillLevel, editing: currentEditingPlayer });
     
     if (!name) {
         alert('Please enter a player name');
@@ -1512,15 +1518,18 @@ async async function savePlayer() {
                 console.log(`✅ Updated player ${currentEditingPlayer} via Firebase`);
             } else {
                 // localStorage fallback
-                const player = players.find(p => p.id === currentEditingPlayer);
-                if (player) {
-                    player.name = name;
-                    player.skillLevel = skillLevel;
+                const playerIndex = players.findIndex(p => p.id === currentEditingPlayer);
+                if (playerIndex !== -1) {
+                    players[playerIndex].name = name;
+                    players[playerIndex].skillLevel = skillLevel;
                     savePlayersToStorage();
                     loadPlayers();
                     renderSchedule();
+                    console.log(`✅ Updated player ${currentEditingPlayer} via localStorage`);
+                } else {
+                    console.error(`❌ Player not found for update: ${currentEditingPlayer}`);
+                    alert('Error: Player not found. Please refresh and try again.');
                 }
-                console.log(`✅ Updated player ${currentEditingPlayer} via localStorage`);
             }
         } else {
             // Add new player
