@@ -1,0 +1,153 @@
+/* Loading Screen Styles */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.loading-logo h1 {
+    margin: 1rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.tennis-ball-bounce {
+    font-size: 3rem;
+    animation: bounce 1.5s infinite ease-in-out;
+    display: inline-block;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -30px, 0);
+    }
+    70% {
+        transform: translate3d(0, -15px, 0);
+    }
+    90% {
+        transform: translate3d(0, -4px, 0);
+    }
+}
+
+.loading-message {
+    margin: 2rem 0;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+    opacity: 1;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-steps {
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.step {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    opacity: 1;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin: 0.3rem 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.step.active {
+    opacity: 1;
+    transform: translateX(10px);
+    color: #FFD700;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #FFD700;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.step.completed {
+    opacity: 1;
+    color: #00FF88;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #00FF88;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.step.completed::after {
+    content: " ✓";
+    color: #90EE90;
+    margin-left: auto;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .loading-content {
+        padding: 1rem;
+        max-width: 300px;
+    }
+    
+    .loading-logo h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tennis-ball-bounce {
+        font-size: 2.5rem;
+    }
+    
+    .loading-text {
+        font-size: 1rem;
+    }
+}

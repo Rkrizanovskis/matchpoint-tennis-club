@@ -1,0 +1,111 @@
+/* Instructor Information Styles - Inline with Day Title */
+.day-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.day-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.instructor-inline {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b7280;
+    opacity: 0.85;
+}
+
+/* Update day card to accommodate instructor */
+.day-card {
+    min-height: 200px; /* Further reduced since instructor info is now inline */
+}
+
+.day-header {
+    background: white;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px 12px;
+}
+
+/* Mobile responsive instructor info */
+@media (max-width: 768px) {
+    .day-title {
+        font-size: 16px;
+    }
+    
+    .instructor-inline {
+        font-size: 10px;
+    }
+    
+    .day-card {
+        min-height: 200px;
+    }
+}
+
+/* Enhanced Tuesday/Thursday styling - Inline */
+.day-card[data-day="tuesday"] .instructor-inline {
+    color: #047857;
+}
+
+.day-card[data-day="thursday"] .instructor-inline {
+    color: #6d28d9;
+}
+
+/* Unavailable days styling */
+.unavailable-text {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.day-card[data-day="monday"] .unavailable-text,
+.day-card[data-day="wednesday"] .unavailable-text {
+    color: #6b7280;
+}
+
+/* Style the entire Monday and Wednesday cards as unavailable */
+.day-card[data-day="monday"],
+.day-card[data-day="wednesday"] {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    opacity: 0.85;
+    position: relative;
+}
+
+.day-card[data-day="monday"]::after,
+.day-card[data-day="wednesday"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.1) 10px,
+        rgba(255,255,255,0.1) 20px
+    );
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.day-card[data-day="monday"] .day-header,
+.day-card[data-day="wednesday"] .day-header {
+    background: transparent;
+}
+
+.day-card[data-day="monday"] .skill-legend,
+.day-card[data-day="wednesday"] .skill-legend {
+    opacity: 0.5;
+}
+
+.day-card[data-day="monday"]:hover,
+.day-card[data-day="wednesday"]:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}

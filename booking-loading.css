@@ -1,0 +1,206 @@
+/* Beautiful Loading States for Tennis Club Booking */
+
+/* Loading button states */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    color: white;
+}
+
+.btn.loading.secondary::after {
+    color: #64748b;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tennis-themed loading spinner */
+.tennis-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tennis-ball-spinner {
+    font-size: 16px;
+    animation: bounce 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    60% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Modal loading overlay */
+.modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    text-align: center;
+    color: #2d3748;
+}
+
+.loading-content .tennis-ball-spinner {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.loading-content .loading-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4F68CC;
+}
+
+.loading-content .loading-subtext {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Success animation */
+.booking-success {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+}
+
+.booking-success.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+@keyframes successPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Disabled form state */
+.form-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-disabled select,
+.form-disabled input {
+    background-color: #f8fafc !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+}
+
+/* Error state */
+.booking-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 12px;
+    display: none;
+    animation: slideInError 0.3s ease-out;
+}
+
+.booking-error.show {
+    display: block;
+}
+
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile loading adjustments */
+@media (max-width: 768px) {
+    .btn.loading::after {
+        width: 18px;
+        height: 18px;
+        margin-left: -9px;
+        margin-top: -9px;
+    }
+    
+    .loading-content .tennis-ball-spinner {
+        font-size: 28px;
+    }
+    
+    .loading-content .loading-text {
+        font-size: 15px;
+    }
+    
+    .booking-success {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+}

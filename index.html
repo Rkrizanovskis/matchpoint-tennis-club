@@ -9,6 +9,11 @@
     <title>Matchpoint Tennis Club - Member Portal</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="modal-styles.css">
+    <link rel="stylesheet" href="booking-loading.css">
+    <link rel="stylesheet" href="club-wall-styles.css">
+    <link rel="stylesheet" href="main-club-wall-styles.css">
+    <link rel="stylesheet" href="instructor-styles.css">
+    <link rel="stylesheet" href="loading-styles.css">
     
     <!-- Firebase SDK v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -31,6 +36,26 @@
                 Access Club
             </button>
             <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="tennis-ball-bounce">🎾</div>
+                <h1>Matchpoint Tennis Club</h1>
+            </div>
+            <div class="loading-message">
+                <div class="loading-text" id="loadingText">Initializing club system...</div>
+                <div class="loading-spinner"></div>
+            </div>
+            <div class="loading-steps">
+                <div class="step" id="step-firebase">🔥 Connecting to Firebase</div>
+                <div class="step" id="step-players">👥 Loading players</div>
+                <div class="step" id="step-schedule">📅 Setting up schedule</div>
+                <div class="step" id="step-messages">💬 Loading club wall</div>
+            </div>
         </div>
     </div>
 
@@ -65,16 +90,7 @@
                     </div>
                 </div>
 
-                <!-- Club Wall -->
-                <div class="admin-section">
-                    <div class="admin-header">
-                        <h4>Club Wall</h4>
-                        <button class="btn" onclick="showAddMessage()">Post Message</button>
-                    </div>
-                    <div class="messages-container" id="messagesContainer">
-                        <!-- Messages will be loaded here -->
-                    </div>
-                </div>
+
             </div>
         </div>
 
@@ -94,11 +110,11 @@
                     <div class="announcement-content">
                         <div class="announcement-text">
                             <div class="announcement-title">
-                                <span class="announcement-icon">🎾</span>
-                                <span>Welcome back to Matchpoint Tennis Club!</span>
+                                <span class="announcement-icon">🏆</span>
+                                <span>Next up: Chef's Invitational on Sep 7</span>
                             </div>
                             <div class="announcement-details">
-                                Your tennis schedule is now powered by real-time updates.
+                                Club Members and Friends Tournament - Registration open now!
                             </div>
                         </div>
                         <button class="announcement-close" onclick="closeAnnouncement()">×</button>
@@ -108,6 +124,17 @@
                 <!-- Schedule Grid -->
                 <div class="schedule-grid" id="scheduleGrid">
                     <!-- Schedule will be loaded here -->
+                </div>
+
+                <!-- Club Wall Section -->
+                <div class="club-wall-section">
+                    <div class="club-wall-header">
+                        <h2>📢 Club Wall</h2>
+                        <button class="btn" onclick="showAddMessage()">Post Message</button>
+                    </div>
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will be loaded here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,10 +167,40 @@
         </div>
     </div>
 
+    <!-- Player Management Modal -->
+    <div id="playerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="playerModalTitle">Add Player</h3>
+                <button class="close" onclick="closePlayerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="playerForm">
+                    <div class="form-group">
+                        <label for="playerName">Player Name:</label>
+                        <input type="text" id="playerName" placeholder="Enter player name" required maxlength="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="playerSkillLevel">Skill Level:</label>
+                        <select id="playerSkillLevel" required>
+                            <option value="">Select skill level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="regular">Regular</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closePlayerModal()">Cancel</button>
+                <button class="btn" onclick="savePlayer()" id="savePlayerBtn">Add Player</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Config -->
-    <script src="firebase-config.js"></script>
+    <script src="firebase-config.js?v=2025-01-15-force-refresh"></script>
     
     <!-- Main Script -->
-    <script src="script-fixed.js"></script>
+    <script src="script-firebase.js?v=2025-01-15-force-refresh"></script>
 </body>
 </html>

@@ -1,0 +1,228 @@
+/* Main Page Club Wall Styles */
+.club-wall-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin: 24px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.club-wall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.club-wall-header h2 {
+    color: #2d3748;
+    font-size: 24px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.club-wall-header .btn {
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(90, 122, 217, 0.3);
+}
+
+.club-wall-header .btn:hover {
+    background: linear-gradient(135deg, #4F68CC 0%, #3E5BA9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 122, 217, 0.4);
+}
+
+/* Messages container specific to main page */
+.club-wall-section .messages-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+/* Enhanced message cards for main page */
+.club-wall-section .club-message {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.club-wall-section .club-message::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+}
+
+.club-wall-section .club-message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-color: #5A7AD9;
+}
+
+.club-wall-section .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.club-wall-section .message-author {
+    font-weight: 700;
+    color: #5A7AD9;
+    font-size: 15px;
+}
+
+.club-wall-section .message-time {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.club-wall-section .message-content {
+    color: #2d3748;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Enhanced no messages state */
+.club-wall-section .no-messages {
+    text-align: center;
+    padding: 48px 24px;
+    color: #64748b;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+.club-wall-section .no-messages-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.club-wall-section .no-messages-text {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.club-wall-section .no-messages-subtitle {
+    font-size: 15px;
+    opacity: 0.8;
+}
+
+/* Mobile responsive for main club wall */
+@media (max-width: 768px) {
+    .club-wall-section {
+        margin: 16px;
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+    
+    .club-wall-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .club-wall-header h2 {
+        font-size: 20px;
+    }
+    
+    .club-wall-header .btn {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+    
+    .club-wall-section .messages-container {
+        max-height: 400px;
+    }
+    
+    .club-wall-section .club-message {
+        padding: 16px;
+    }
+    
+    .club-wall-section .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .club-wall-section .no-messages {
+        padding: 32px 16px;
+    }
+    
+    .club-wall-section .no-messages-icon {
+        font-size: 42px;
+    }
+}
+
+/* Scrollbar styling for main club wall */
+.club-wall-section .messages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animation for new messages on main page */
+.club-wall-section .club-message {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Integration with main app layout */
+.main-content .club-wall-section {
+    max-width: 1200px;
+    margin: 24px auto;
+}
+
+/* Ensure proper spacing after schedule */
+.schedule-grid + .club-wall-section {
+    margin-top: 32px;
+}
