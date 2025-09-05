@@ -1477,7 +1477,7 @@ function closePlayerModal() {
     document.getElementById('playerSkillLevel').value = '';
 }
 
-async function savePlayer() {
+async async function savePlayer() {
     const name = document.getElementById('playerName').value.trim();
     const skillLevel = document.getElementById('playerSkillLevel').value;
     
@@ -1524,7 +1524,36 @@ async function savePlayer() {
             }
         } else {
             // Add new player
-            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            // Generate unique ID that preserves Latvian characters
+            const timestamp = Date.now();
+            const cleanName = name.toLowerCase()
+                .replace(/[āàáâãäå]/g, 'a')
+                .replace(/[čć]/g, 'c')
+                .replace(/[ēèéêë]/g, 'e')
+                .replace(/[ģ]/g, 'g')
+                .replace(/[īìíîï]/g, 'i')
+                .replace(/[ķ]/g, 'k')
+                .replace(/[ļ]/g, 'l')
+                .replace(/[ņñ]/g, 'n')
+                .replace(/[ōòóôõö]/g, 'o')
+                .replace(/[ŗ]/g, 'r')
+                .replace(/[š]/g, 's')
+                .replace(/[ūùúûü]/g, 'u')
+                .replace(/[ž]/g, 'z')
+                .replace(/[^a-z0-9]/g, '');
+            const id = `${cleanName}_${timestamp}`;
+            
+            // Check if player already exists
+            const existingPlayer = players.find(p => 
+                p.name.toLowerCase() === name.toLowerCase()
+            );
+            
+            if (existingPlayer) {
+                alert('A player with this name already exists!');
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                return;
+            }
             
             if (firebaseEnabled && database) {
                 // Add to Firebase
