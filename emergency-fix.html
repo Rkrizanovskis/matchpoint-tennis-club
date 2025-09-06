@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Modal Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+        .emergency-btn {
+            padding: 20px 40px;
+            margin: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .emergency-btn:hover {
+            background: #c82333;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px;
+            font-family: monospace;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 Emergency Modal Fix</h1>
+    <p>If your edit modal is stuck, use these emergency fixes:</p>
+    
+    <button class="emergency-btn" onclick="forceCloseModal()">
+        🔧 Force Close Modal
+    </button>
+    
+    <button class="emergency-btn" onclick="resetEditingState()">
+        🔄 Reset Editing State
+    </button>
+    
+    <button class="emergency-btn" onclick="reloadPage()">
+        🔄 Reload Page
+    </button>
+
+    <div class="code-block">
+        <strong>Or run this in browser console:</strong><br>
+        <code>
+            // Force close modal<br>
+            document.getElementById('playerModal').style.display = 'none';<br>
+            currentEditingPlayer = null;<br>
+            <br>
+            // Reset button<br>
+            const btn = document.getElementById('savePlayerBtn');<br>
+            if (btn) {<br>
+            &nbsp;&nbsp;btn.textContent = 'Update Player';<br>
+            &nbsp;&nbsp;btn.disabled = false;<br>
+            }
+        </code>
+    </div>
+
+    <script>
+        function forceCloseModal() {
+            // Try to access parent window if this is opened in new tab
+            try {
+                const targetWindow = window.opener || window.parent || window;
+                
+                // Force close modal
+                const modal = targetWindow.document.getElementById('playerModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    console.log('✅ Modal closed');
+                }
+                
+                // Reset editing state
+                if (targetWindow.currentEditingPlayer) {
+                    targetWindow.currentEditingPlayer = null;
+                    console.log('✅ Editing state reset');
+                }
+                
+                // Reset button
+                const btn = targetWindow.document.getElementById('savePlayerBtn');
+                if (btn) {
+                    btn.textContent = 'Update Player';
+                    btn.disabled = false;
+                    console.log('✅ Button reset');
+                }
+                
+                alert('Emergency fix applied! Modal should be closed.');
+                
+            } catch (error) {
+                console.error('Emergency fix failed:', error);
+                alert('Could not apply fix. Please run the console commands manually.');
+            }
+        }
+        
+        function resetEditingState() {
+            try {
+                const targetWindow = window.opener || window.parent || window;
+                targetWindow.currentEditingPlayer = null;
+                alert('Editing state reset!');
+            } catch (error) {
+                alert('Please run: currentEditingPlayer = null; in the console');
+            }
+        }
+        
+        function reloadPage() {
+            try {
+                const targetWindow = window.opener || window.parent || window;
+                targetWindow.location.reload();
+            } catch (error) {
+                alert('Please manually refresh your main app page');
+            }
+        }
+    </script>
+</body>
+</html>

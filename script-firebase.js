@@ -171,7 +171,8 @@ function login() {
     const password = document.getElementById('passwordInput').value;
     const errorDiv = document.getElementById('loginError');
     
-    if (password === '30:Love') {
+    // Accept both passwords: "30:Love" and "30:love"
+    if (password === '30:Love' || password === '30:love') {
         console.log('✅ Login successful');
         isAuthenticated = true;
         
