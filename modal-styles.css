@@ -211,6 +211,11 @@
     font-weight: 500;
     border: 2px solid transparent;
     transition: all 0.2s;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
 }
 
 .current-players-list .player-tag.beginner {
@@ -223,6 +228,27 @@
     background: linear-gradient(135deg, #E8F0FF 0%, #DCE7FF 100%);
     color: #1E3A8A;
     border-color: rgba(121, 158, 255, 0.3);
+}
+
+.current-players-list .player-tag .remove-x {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.6;
+    margin-left: 2px;
+    transition: opacity 0.2s ease;
+}
+
+.current-players-list .player-tag:hover .remove-x {
+    opacity: 1;
+    color: #dc2626;
+}
+
+.current-players-list .player-tag.beginner .remove-x:hover {
+    color: #b91c1c;
+}
+
+.current-players-list .player-tag.regular .remove-x:hover {
+    color: #b91c1c;
 }
 
 /* Modal footer */

@@ -925,6 +925,34 @@ body {
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.player-tag .remove-x {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.6;
+    margin-left: 2px;
+    transition: opacity 0.2s ease;
+}
+
+.player-tag:hover .remove-x {
+    opacity: 1;
+    color: #dc2626;
+}
+
+/* Past slot player tags (no remove functionality) */
+.time-slot.past .player-tag {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.time-slot.past .player-tag:hover {
+    transform: none;
+    opacity: 0.7;
 }
 
 .player-tag.beginner {
@@ -957,6 +985,7 @@ body {
         min-height: 36px;
         display: inline-flex;
         align-items: center;
+        gap: 6px;
         margin: 2px;
     }
     

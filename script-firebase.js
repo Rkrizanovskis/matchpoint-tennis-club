@@ -860,7 +860,9 @@ function createTimeSlotHTML(day, time, date) {
             <div class="players-list">
                 ${slotData.players.map(playerId => {
                     const player = players.find(p => p.id === playerId);
-                    return player ? `<span class="player-tag ${player.skillLevel}" onclick="removePlayer('${day}', '${time}', '${playerId}'); event.stopPropagation();">${player.name}</span>` : '';
+                    const removeX = isPast ? '' : '<span class="remove-x">×</span>';
+                    const clickAction = isPast ? '' : `onclick="removePlayer('${day}', '${time}', '${playerId}'); event.stopPropagation();" title="Click to remove player"`;
+                    return player ? `<span class="player-tag ${player.skillLevel}" ${clickAction}>${player.name}${removeX}</span>` : '';
                 }).join('')}
             </div>
             ${isAvailable && !isPast ? '<button class="add-player-btn">+ Add Player</button>' : ''}
@@ -1516,6 +1518,16 @@ async function savePlayer() {
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 console.log(`✅ Updated player ${currentEditingPlayer} via Firebase`);
+                
+                // Also update local array immediately for faster UI response
+                const playerIndex = players.findIndex(p => p.id === currentEditingPlayer);
+                if (playerIndex !== -1) {
+                    players[playerIndex].name = name;
+                    players[playerIndex].skillLevel = skillLevel;
+                    loadPlayers();
+                    renderSchedule();
+                    console.log(`✅ Local player data updated for immediate UI refresh`);
+                }
             } else {
                 // localStorage fallback
                 const playerIndex = players.findIndex(p => p.id === currentEditingPlayer);

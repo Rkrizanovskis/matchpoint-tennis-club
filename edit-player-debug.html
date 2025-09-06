@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Player Debug Test</title>
+    <link rel="stylesheet" href="styles.css?v=2025-09-05-remove-x">
+    <link rel="stylesheet" href="modal-styles.css?v=2025-09-05-remove-x">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .debug-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .player-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .player-actions button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎾 Edit Player Debug Test</h1>
+        <p>Testing the edit player functionality with debug logging.</p>
+        
+        <div class="player-card">
+            <div class="player-name"><strong>Jūlija</strong> (regular)</div>
+            <div class="player-actions">
+                <button onclick="testEditPlayer()" style="background: #ffc107;">✏️ Edit</button>
+                <button onclick="showDebugInfo()" style="background: #6c757d; color: white;">🔍 Debug</button>
+            </div>
+        </div>
+
+        <div class="debug-log" id="debugLog">
+            <strong>Debug Log:</strong><br>
+            Page loaded - ready for testing
+        </div>
+
+        <button class="test-btn" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Player Modal (simplified) -->
+    <div id="playerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="playerModalTitle">Edit Player</h3>
+                <button class="close" onclick="closePlayerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="playerForm">
+                    <div class="form-group">
+                        <label for="playerName">Player Name:</label>
+                        <input type="text" id="playerName" placeholder="Enter player name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="playerSkillLevel">Skill Level:</label>
+                        <select id="playerSkillLevel" required>
+                            <option value="">Select skill level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="regular">Regular</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closePlayerModal()">Cancel</button>
+                <button class="btn" onclick="testSavePlayer()" id="savePlayerBtn">Update Player</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data and functions for testing
+        let currentEditingPlayer = null;
+        let testPlayers = [
+            { id: 'player_julija_123', name: 'Jūlija', skillLevel: 'regular' }
+        ];
+
+        function log(message) {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<br>[${timestamp}] ${message}`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '<strong>Debug Log:</strong><br>Log cleared';
+        }
+
+        function testEditPlayer() {
+            log('🔧 Starting edit player test...');
+            
+            const playerId = 'player_julija_123';
+            const player = testPlayers.find(p => p.id === playerId);
+            
+            if (!player) {
+                log('❌ Player not found!');
+                return;
+            }
+
+            log(`✅ Found player: ${player.name} (${player.skillLevel})`);
+            
+            currentEditingPlayer = playerId;
+            log(`📝 Set currentEditingPlayer to: ${currentEditingPlayer}`);
+            
+            // Set form values
+            document.getElementById('playerModalTitle').textContent = 'Edit Player';
+            document.getElementById('playerName').value = player.name;
+            document.getElementById('playerSkillLevel').value = player.skillLevel;
+            document.getElementById('savePlayerBtn').textContent = 'Update Player';
+            
+            log(`📋 Form populated with: name="${player.name}", skill="${player.skillLevel}"`);
+            
+            // Show modal
+            document.getElementById('playerModal').style.display = 'flex';
+            log('🎯 Modal displayed');
+            
+            // Focus on name input
+            setTimeout(() => {
+                document.getElementById('playerName').focus();
+                log('🎯 Name input focused');
+            }, 100);
+        }
+
+        function testSavePlayer() {
+            log('💾 Save player clicked...');
+            
+            const name = document.getElementById('playerName').value.trim();
+            const skillLevel = document.getElementById('playerSkillLevel').value;
+            
+            log(`📝 Form values: name="${name}", skillLevel="${skillLevel}"`);
+            log(`🔄 currentEditingPlayer: ${currentEditingPlayer}`);
+            
+            if (!name) {
+                log('❌ Name validation failed');
+                alert('Please enter a player name');
+                return;
+            }
+            
+            if (!skillLevel) {
+                log('❌ Skill level validation failed');
+                alert('Please select a skill level');
+                return;
+            }
+            
+            // Show loading state
+            const saveBtn = document.getElementById('savePlayerBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+            log('⏳ Button set to loading state');
+            
+            // Simulate update
+            setTimeout(() => {
+                if (currentEditingPlayer) {
+                    log('🔄 Updating existing player...');
+                    const playerIndex = testPlayers.findIndex(p => p.id === currentEditingPlayer);
+                    if (playerIndex !== -1) {
+                        const oldSkill = testPlayers[playerIndex].skillLevel;
+                        testPlayers[playerIndex].name = name;
+                        testPlayers[playerIndex].skillLevel = skillLevel;
+                        log(`✅ Updated: ${name} from "${oldSkill}" to "${skillLevel}"`);
+                        
+                        // Reset form
+                        closePlayerModal();
+                        log('✅ Modal closed, update complete');
+                    } else {
+                        log('❌ Player not found in array!');
+                    }
+                } else {
+                    log('❌ No currentEditingPlayer set!');
+                }
+                
+                // Reset button
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }, 1000);
+        }
+
+        function closePlayerModal() {
+            log('❌ Closing modal...');
+            document.getElementById('playerModal').style.display = 'none';
+            currentEditingPlayer = null;
+            log('🔄 currentEditingPlayer reset to null');
+        }
+
+        function showDebugInfo() {
+            log('🔍 Debug info:');
+            log(`- currentEditingPlayer: ${currentEditingPlayer}`);
+            log(`- testPlayers: ${JSON.stringify(testPlayers)}`);
+            log(`- Modal display: ${document.getElementById('playerModal').style.display}`);
+            
+            const nameField = document.getElementById('playerName');
+            const skillField = document.getElementById('playerSkillLevel');
+            log(`- Name field value: "${nameField.value}"`);
+            log(`- Skill field value: "${skillField.value}"`);
+        }
+
+        // Add form submission handler
+        document.getElementById('playerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            log('📝 Form submitted via Enter key');
+            testSavePlayer();
+        });
+
+        log('🚀 Debug test page ready');
+    </script>
+</body>
+</html>
