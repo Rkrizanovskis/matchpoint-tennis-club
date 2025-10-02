@@ -19,6 +19,8 @@ window.closeMessageModal = closeMessageModal;
 window.postClubMessage = postClubMessage;
 window.closePlayerModal = closePlayerModal;
 window.savePlayer = savePlayer;
+window.saveSeasonTemplate = saveSeasonTemplate;
+window.getSeasonTemplate = getSeasonTemplate;
 
 // App State
 let isAuthenticated = false;
@@ -364,12 +366,96 @@ async function initializeFirebaseData() {
     }
 }
 
+// ============================================
+// SEASON TEMPLATE FUNCTIONS
+// ============================================
+
+// Get the season template from Firebase
+async function getSeasonTemplate() {
+    if (!firebaseEnabled || !database) return null;
+    
+    try {
+        const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+        if (templateDoc.exists) {
+            console.log('📋 Season template loaded');
+            return templateDoc.data();
+        }
+        console.log('⚠️ No season template found');
+        return null;
+    } catch (error) {
+        console.error('Error loading season template:', error);
+        return null;
+    }
+}
+
+// Save current week as season template
+async function saveSeasonTemplate(weekOffset = 0) {
+    if (!firebaseEnabled || !database) return false;
+    
+    try {
+        const weekStart = getWeekStartDate(weekOffset);
+        const days = ['tuesday', 'thursday'];
+        const timeSlots = ['20:00-21:00', '21:00-22:00'];
+        
+        const template = {
+            tuesday: {},
+            thursday: {}
+        };
+        
+        // Collect current week's data
+        for (const day of days) {
+            for (const time of timeSlots) {
+                const dayDate = new Date(weekStart);
+                const dayOffset = day === 'tuesday' ? 1 : 3;
+                dayDate.setDate(weekStart.getDate() + dayOffset);
+                const dateStr = formatDateForId(dayDate);
+                const sessionId = getSessionId(dateStr, day, time);
+                
+                const docRef = database.collection('schedules').doc(sessionId);
+                const doc = await docRef.get();
+                
+                const instructor = day === 'tuesday' ? 'Paša' : 'Justīne';
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    template[day][time] = {
+                        players: data.players || [],
+                        instructor: instructor
+                    };
+                } else {
+                    template[day][time] = {
+                        players: [],
+                        instructor: instructor
+                    };
+                }
+            }
+        }
+        
+        // Save to Firebase
+        await database.collection('seasonTemplate').doc('default').set({
+            ...template,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            sourceWeek: formatDateForId(weekStart)
+        });
+        
+        console.log('✅ Season template saved:', template);
+        return true;
+    } catch (error) {
+        console.error('Error saving season template:', error);
+        return false;
+    }
+}
+
+// Initialize week schedule with template support
 async function initializeWeekSchedule(weekOffset) {
     if (!firebaseEnabled || !database) return;
     
     const weekStart = getWeekStartDate(weekOffset);
     const days = ['tuesday', 'thursday'];
     const timeSlots = ['20:00-21:00', '21:00-22:00'];
+    
+    // Load season template
+    const template = await getSeasonTemplate();
     
     const batch = database.batch();
     let hasWrites = false;
@@ -391,7 +477,13 @@ async function initializeWeekSchedule(weekOffset) {
             
             if (!doc.exists) {
                 const instructor = day === 'tuesday' ? 'Paša' : 'Justīne';
-                const defaultPlayers = [];
+                
+                // Use template players if available, otherwise empty array
+                let defaultPlayers = [];
+                if (template && template[day] && template[day][time]) {
+                    defaultPlayers = template[day][time].players || [];
+                    console.log(`📋 Using template for ${day} ${time}: ${defaultPlayers.length} players`);
+                }
                 
                 batch.set(docRef, {
                     date: dateStr,
@@ -408,11 +500,18 @@ async function initializeWeekSchedule(weekOffset) {
         }
     }
     
+    
     if (hasWrites) {
         await batch.commit();
         console.log('📅 Week schedule initialized in Firebase');
     }
-}// Firebase-enabled booking functions
+}
+
+// ============================================
+// END SEASON TEMPLATE FUNCTIONS
+// ============================================
+
+// Firebase-enabled booking functions
 async function confirmBooking() {
     if (!currentBookingSlot) return;
     

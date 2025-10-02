@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Template System</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .section {
+            background: #2d2d2d;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .section.error { border-left-color: #f44336; }
+        .section.warning { border-left-color: #ff9800; }
+        h2 { color: #4CAF50; margin-top: 0; }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: monospace;
+        }
+        .btn:hover { background: #45a049; }
+        pre {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+        .log { 
+            color: #9cdcfe; 
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Template System Debugger</h1>
+    
+    <div class="section">
+        <h2>Quick Actions</h2>
+        <button class="btn" onclick="runFullDiagnostic()">🔍 Run Full Diagnostic</button>
+        <button class="btn" onclick="checkCurrentWeek()">📅 Check Current Week Data</button>
+        <button class="btn" onclick="checkTemplate()">📋 Check Template</button>
+        <button class="btn" onclick="simulateNextWeek()">⏭️ Simulate Next Week Init</button>
+    </div>
+    
+    <div id="output"></div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let database = null;
+        let output = document.getElementById('output');
+        
+        function log(message, type = 'log') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(div);
+        }
+        
+        function section(title, content, type = '') {
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<h2>${title}</h2><pre>${content}</pre>`;
+            output.appendChild(div);
+        }
+        
+        // Initialize Firebase
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                database = firebase.firestore();
+                log('✅ Connected to Firebase', 'success');
+            } catch (error) {
+                log('❌ Failed to connect: ' + error.message, 'error');
+            }
+        }
+        
+        function formatDateForId(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        function getWeekStartDate(weekOffset = 0) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (weekOffset * 7));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        function getSessionId(date, day, time) {
+            return `${date}-${day}-${time}`;
+        }
+        
+        async function checkCurrentWeek() {
+            output.innerHTML = '';
+            log('🔍 Checking current week schedule...', 'info');
+            
+            const weekStart = getWeekStartDate(0);
+            const days = ['tuesday', 'thursday'];
+            const timeSlots = ['20:00-21:00', '21:00-22:00'];
+            
+            const results = {};
+            
+            for (const day of days) {
+                results[day] = {};
+                for (const time of timeSlots) {
+                    const dayDate = new Date(weekStart);
+                    const dayOffset = day === 'tuesday' ? 1 : 3;
+                    dayDate.setDate(weekStart.getDate() + dayOffset);
+                    const dateStr = formatDateForId(dayDate);
+                    const sessionId = getSessionId(dateStr, day, time);
+                    
+                    log(`Checking: ${sessionId}`, 'info');
+                    
+                    const docRef = database.collection('schedules').doc(sessionId);
+                    const doc = await docRef.get();
+                    
+                    if (doc.exists) {
+                        const data = doc.data();
+                        results[day][time] = {
+                            exists: true,
+                            players: data.players || [],
+                            playerCount: (data.players || []).length
+                        };
+                        log(`✓ Found ${data.players.length} players`, 'success');
+                    } else {
+                        results[day][time] = {
+                            exists: false,
+                            players: [],
+                            playerCount: 0
+                        };
+                        log(`✗ Document not found!`, 'error');
+                    }
+                }
+            }
+            
+            section('Current Week Schedule', JSON.stringify(results, null, 2));
+        }
+        
+        async function checkTemplate() {
+            output.innerHTML = '';
+            log('🔍 Checking season template...', 'info');
+            
+            try {
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                
+                if (templateDoc.exists) {
+                    const template = templateDoc.data();
+                    log('✅ Template exists!', 'success');
+                    
+                    // Count players in template
+                    let totalPlayers = 0;
+                    for (const day in template) {
+                        if (day === 'tuesday' || day === 'thursday') {
+                            for (const time in template[day]) {
+                                const players = template[day][time].players || [];
+                                totalPlayers += players.length;
+                                log(`${day} ${time}: ${players.length} players`, 'info');
+                            }
+                        }
+                    }
+                    
+                    log(`Total players in template: ${totalPlayers}`, 'success');
+                    section('Season Template', JSON.stringify(template, null, 2));
+                } else {
+                    log('❌ No template found!', 'error');
+                    section('Error', 'No template exists. Create one first!', 'error');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+                section('Error', error.stack, 'error');
+            }
+        }
+        
+        async function simulateNextWeek() {
+            output.innerHTML = '';
+            log('🔍 Simulating next week initialization...', 'info');
+            
+            const weekStart = getWeekStartDate(1); // Next week
+            log(`Next week starts: ${formatDateForId(weekStart)}`, 'info');
+            
+            // Step 1: Load template
+            log('Step 1: Loading template...', 'info');
+            const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+            const template = templateDoc.exists ? templateDoc.data() : null;
+            
+            if (template) {
+                log('✅ Template loaded', 'success');
+            } else {
+                log('⚠️ No template found!', 'warning');
+            }
+            
+            // Step 2: Check what exists and what would be created
+            const days = ['tuesday', 'thursday'];
+            const timeSlots = ['20:00-21:00', '21:00-22:00'];
+            
+            const simulation = {};
+            
+            for (const day of days) {
+                simulation[day] = {};
+                for (const time of timeSlots) {
+                    const dayDate = new Date(weekStart);
+                    const dayOffset = day === 'tuesday' ? 1 : 3;
+                    dayDate.setDate(weekStart.getDate() + dayOffset);
+                    const dateStr = formatDateForId(dayDate);
+                    const sessionId = getSessionId(dateStr, day, time);
+                    
+                    log(`\nChecking: ${sessionId}`, 'info');
+                    
+                    const docRef = database.collection('schedules').doc(sessionId);
+                    const doc = await docRef.get();
+                    
+                    if (doc.exists) {
+                        const data = doc.data();
+                        simulation[day][time] = {
+                            action: 'ALREADY EXISTS',
+                            players: data.players,
+                            playerCount: data.players.length
+                        };
+                        log(`Already exists with ${data.players.length} players`, 'info');
+                    } else {
+                        // Would be created
+                        let defaultPlayers = [];
+                        
+                        if (template && template[day] && template[day][time]) {
+                            defaultPlayers = template[day][time].players || [];
+                            log(`✓ Would use template: ${defaultPlayers.length} players`, 'success');
+                        } else {
+                            log(`✗ No template data, would be empty`, 'warning');
+                        }
+                        
+                        simulation[day][time] = {
+                            action: 'WOULD BE CREATED',
+                            players: defaultPlayers,
+                            playerCount: defaultPlayers.length,
+                            usedTemplate: defaultPlayers.length > 0
+                        };
+                    }
+                }
+            }
+            
+            section('Next Week Simulation', JSON.stringify(simulation, null, 2));
+            
+            // Show the actual initializeWeekSchedule logic
+            log('\n📝 This is what initializeWeekSchedule would do:', 'info');
+            section('Logic Trace', `
+1. Load template: ${template ? '✓ Found' : '✗ Not found'}
+2. For each day/time slot:
+   - Check if document exists
+   - If NOT exists:
+     ${template ? '✓ Use template players' : '✗ Create empty array'}
+   - If EXISTS:
+     ✓ Skip (preserve existing data)
+            `.trim());
+        }
+        
+        async function runFullDiagnostic() {
+            output.innerHTML = '';
+            log('🚀 Running full diagnostic...', 'info');
+            
+            await checkCurrentWeek();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await checkTemplate();
+            await new Promise(r => setTimeout(r, 500));
+            
+            await simulateNextWeek();
+            
+            log('\n✅ Diagnostic complete!', 'success');
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

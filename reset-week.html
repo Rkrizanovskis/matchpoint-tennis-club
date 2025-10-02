@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Week Tool</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2d3748; margin-top: 0; }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn.danger { background: #ef4444; }
+        .btn.danger:hover { background: #dc2626; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .code {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .week-selector {
+            margin: 20px 0;
+        }
+        .week-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .week-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Reset Week Tool</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This tool will delete existing schedule data for the selected week and re-create it using the season template.
+        </div>
+        
+        <div id="status" class="status info">
+            Connecting to Firebase...
+        </div>
+        
+        <div class="week-selector">
+            <label>Select Week to Reset:</label>
+            <select id="weekSelector">
+                <option value="">-- Choose a week --</option>
+            </select>
+        </div>
+        
+        <div>
+            <button class="btn danger" onclick="resetSelectedWeek()" id="resetBtn" disabled>
+                🗑️ Delete & Re-initialize Week
+            </button>
+            
+            <button class="btn" onclick="previewWeek()">
+                👁️ Preview Current Data
+            </button>
+        </div>
+        
+        <div id="output" class="code" style="display: none;"></div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let database = null;
+        
+        // Initialize Firebase
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                database = firebase.firestore();
+                updateStatus('✅ Connected to Firebase', 'success');
+                populateWeekSelector();
+            } catch (error) {
+                updateStatus('❌ Failed to connect: ' + error.message, 'error');
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+        
+        function showOutput(data) {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Helper functions
+        function formatDateForId(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        function getWeekStartDate(weekOffset = 0) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (weekOffset * 7));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        function getSessionId(date, day, time) {
+            return `${date}-${day}-${time}`;
+        }
+        
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+        
+        // Populate week selector with next 8 weeks
+        function populateWeekSelector() {
+            const selector = document.getElementById('weekSelector');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Add next 8 weeks
+            for (let i = 1; i <= 8; i++) {
+                const weekStart = getWeekStartDate(i);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 3);
+                
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Week ${i}: ${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+                selector.appendChild(option);
+            }
+            
+            // Enable reset button when week is selected
+            selector.addEventListener('change', () => {
+                resetBtn.disabled = !selector.value;
+            });
+        }
+        
+        // Preview current week data
+        async function previewWeek() {
+            const selector = document.getElementById('weekSelector');
+            const weekOffset = parseInt(selector.value);
+            
+            if (!weekOffset) {
+                updateStatus('⚠️ Please select a week first', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Loading week data...', 'info');
+            
+            try {
+                const weekStart = getWeekStartDate(weekOffset);
+                const days = ['tuesday', 'thursday'];
+                const timeSlots = ['20:00-21:00', '21:00-22:00'];
+                
+                const weekData = {};
+                
+                for (const day of days) {
+                    weekData[day] = {};
+                    for (const time of timeSlots) {
+                        const dayDate = new Date(weekStart);
+                        const dayOffset = day === 'tuesday' ? 1 : 3;
+                        dayDate.setDate(weekStart.getDate() + dayOffset);
+                        const dateStr = formatDateForId(dayDate);
+                        const sessionId = getSessionId(dateStr, day, time);
+                        
+                        const docRef = database.collection('schedules').doc(sessionId);
+                        const doc = await docRef.get();
+                        
+                        if (doc.exists) {
+                            const data = doc.data();
+                            weekData[day][time] = {
+                                exists: true,
+                                players: data.players || [],
+                                playerCount: (data.players || []).length
+                            };
+                        } else {
+                            weekData[day][time] = {
+                                exists: false
+                            };
+                        }
+                    }
+                }
+                
+                updateStatus('✅ Week data loaded', 'success');
+                showOutput(weekData);
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Reset selected week
+        async function resetSelectedWeek() {
+            const selector = document.getElementById('weekSelector');
+            const weekOffset = parseInt(selector.value);
+            
+            if (!weekOffset) {
+                updateStatus('⚠️ Please select a week first', 'error');
+                return;
+            }
+            
+            const weekStart = getWeekStartDate(weekOffset);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 3);
+            
+            const confirmed = confirm(
+                `⚠️ Are you sure you want to reset the week of ${formatDate(weekStart)} - ${formatDate(weekEnd)}?\n\n` +
+                `This will:\n` +
+                `1. Delete all existing schedule data for this week\n` +
+                `2. Re-create it using the current season template\n\n` +
+                `This action cannot be undone!`
+            );
+            
+            if (!confirmed) return;
+            
+            updateStatus('⏳ Resetting week...', 'info');
+            
+            try {
+                // Step 1: Load template
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                
+                if (!templateDoc.exists) {
+                    updateStatus('❌ No template found! Create a template first.', 'error');
+                    return;
+                }
+                
+                const template = templateDoc.data();
+                
+                // Step 2: Delete existing week data
+                const days = ['tuesday', 'thursday'];
+                const timeSlots = ['20:00-21:00', '21:00-22:00'];
+                
+                const batch = database.batch();
+                
+                for (const day of days) {
+                    for (const time of timeSlots) {
+                        const dayDate = new Date(weekStart);
+                        const dayOffset = day === 'tuesday' ? 1 : 3;
+                        dayDate.setDate(weekStart.getDate() + dayOffset);
+                        const dateStr = formatDateForId(dayDate);
+                        const sessionId = getSessionId(dateStr, day, time);
+                        
+                        const docRef = database.collection('schedules').doc(sessionId);
+                        
+                        // Delete existing document
+                        batch.delete(docRef);
+                    }
+                }
+                
+                await batch.commit();
+                console.log('✓ Deleted existing week data');
+                
+                // Step 3: Re-create with template
+                const batch2 = database.batch();
+                
+                for (const day of days) {
+                    for (const time of timeSlots) {
+                        const dayDate = new Date(weekStart);
+                        const dayOffset = day === 'tuesday' ? 1 : 3;
+                        dayDate.setDate(weekStart.getDate() + dayOffset);
+                        const dateStr = formatDateForId(dayDate);
+                        const sessionId = getSessionId(dateStr, day, time);
+                        
+                        const docRef = database.collection('schedules').doc(sessionId);
+                        const instructor = day === 'tuesday' ? 'Paša' : 'Justīne';
+                        
+                        // Use template players
+                        const defaultPlayers = template[day][time].players || [];
+                        
+                        batch2.set(docRef, {
+                            date: dateStr,
+                            day: day,
+                            instructor: instructor,
+                            time: time,
+                            players: defaultPlayers,
+                            maxCapacity: 5,
+                            locked: false,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+                
+                await batch2.commit();
+                console.log('✓ Re-created week with template');
+                
+                updateStatus('✅ Week reset successfully! Template applied.', 'success');
+                
+                // Show updated data
+                setTimeout(() => previewWeek(), 500);
+                
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

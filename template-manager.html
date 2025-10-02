@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season Template Manager</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2d3748; margin-top: 0; }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .code {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 Season Template Manager</h1>
+        <p>Use this page to manage the default season template for your tennis club.</p>
+        
+        <div id="status" class="status info">
+            Connecting to Firebase...
+        </div>
+        
+        <div>
+            <h3>Current Week (Sep 30 - Oct 3, 2024)</h3>
+            <button class="btn" onclick="saveCurrentWeekAsTemplate()">
+                Save Current Week as Template
+            </button>
+            
+            <h3>View Template</h3>
+            <button class="btn" onclick="viewTemplate()">
+                Show Current Template
+            </button>
+            
+            <h3>Test Future Week</h3>
+            <button class="btn" onclick="testNextWeek()">
+                Initialize Next Week (Should Use Template)
+            </button>
+        </div>
+        
+        <div id="output" class="code" style="display: none;"></div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let database = null;
+        
+        // Initialize Firebase
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                database = firebase.firestore();
+                updateStatus('✅ Connected to Firebase', 'success');
+                console.log('Firebase initialized');
+            } catch (error) {
+                updateStatus('❌ Failed to connect: ' + error.message, 'error');
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+        
+        function showOutput(data) {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Helper functions
+        function formatDateForId(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        function getWeekStartDate(weekOffset = 0) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (weekOffset * 7));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        function getSessionId(date, day, time) {
+            return `${date}-${day}-${time}`;
+        }
+        
+        // Save current week as template
+        async function saveCurrentWeekAsTemplate() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Saving current week as template...', 'info');
+            
+            try {
+                const weekStart = getWeekStartDate(0);
+                const days = ['tuesday', 'thursday'];
+                const timeSlots = ['20:00-21:00', '21:00-22:00'];
+                
+                const template = {
+                    tuesday: {},
+                    thursday: {}
+                };
+                
+                // Collect current week's data
+                for (const day of days) {
+                    for (const time of timeSlots) {
+                        const dayDate = new Date(weekStart);
+                        const dayOffset = day === 'tuesday' ? 1 : 3;
+                        dayDate.setDate(weekStart.getDate() + dayOffset);
+                        const dateStr = formatDateForId(dayDate);
+                        const sessionId = getSessionId(dateStr, day, time);
+                        
+                        const docRef = database.collection('schedules').doc(sessionId);
+                        const doc = await docRef.get();
+                        
+                        const instructor = day === 'tuesday' ? 'Paša' : 'Justīne';
+                        
+                        if (doc.exists) {
+                            const data = doc.data();
+                            template[day][time] = {
+                                players: data.players || [],
+                                instructor: instructor
+                            };
+                        } else {
+                            template[day][time] = {
+                                players: [],
+                                instructor: instructor
+                            };
+                        }
+                    }
+                }
+                
+                // Save to Firebase
+                await database.collection('seasonTemplate').doc('default').set({
+                    ...template,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sourceWeek: formatDateForId(weekStart)
+                });
+                
+                updateStatus('✅ Template saved successfully!', 'success');
+                showOutput(template);
+                console.log('Template saved:', template);
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // View current template
+        async function viewTemplate() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Loading template...', 'info');
+            
+            try {
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                
+                if (templateDoc.exists) {
+                    const template = templateDoc.data();
+                    updateStatus('✅ Template loaded', 'success');
+                    showOutput(template);
+                    console.log('Current template:', template);
+                } else {
+                    updateStatus('⚠️ No template found', 'info');
+                    showOutput({ message: 'No template set' });
+                }
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Test initializing next week
+        async function testNextWeek() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Testing next week initialization...', 'info');
+            
+            try {
+                const weekStart = getWeekStartDate(1);
+                const days = ['tuesday', 'thursday'];
+                const timeSlots = ['20:00-21:00', '21:00-22:00'];
+                
+                // Load template
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                const template = templateDoc.exists ? templateDoc.data() : null;
+                
+                const result = {};
+                
+                for (const day of days) {
+                    result[day] = {};
+                    for (const time of timeSlots) {
+                        const dayDate = new Date(weekStart);
+                        const dayOffset = day === 'tuesday' ? 1 : 3;
+                        dayDate.setDate(weekStart.getDate() + dayOffset);
+                        const dateStr = formatDateForId(dayDate);
+                        const sessionId = getSessionId(dateStr, day, time);
+                        
+                        const docRef = database.collection('schedules').doc(sessionId);
+                        const doc = await docRef.get();
+                        
+                        if (doc.exists) {
+                            result[day][time] = {
+                                status: 'Already exists',
+                                players: doc.data().players
+                            };
+                        } else {
+                            let players = [];
+                            if (template && template[day] && template[day][time]) {
+                                players = template[day][time].players || [];
+                            }
+                            result[day][time] = {
+                                status: 'Would be created',
+                                players: players,
+                                usedTemplate: players.length > 0
+                            };
+                        }
+                    }
+                }
+                
+                updateStatus('✅ Next week analysis complete', 'success');
+                showOutput(result);
+                console.log('Next week test:', result);
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
