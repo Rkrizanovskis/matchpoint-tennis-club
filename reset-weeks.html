@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Weeks - Apply New Template</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 { color: #dc2626; margin-top: 0; text-align: center; }
+        .warning { background: #fef2f2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .btn {
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-info { background: #3b82f6; }
+        .btn-info:hover { background: #2563eb; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+        .week-item {
+            background: #f8fafc;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Reset Weeks to Apply New Template</h1>
+        
+        <div class="warning">
+            <strong>Warning:</strong> This will DELETE existing schedule data for selected weeks so they can be re-initialized with the new template players.
+        </div>
+        
+        <div id="status" class="status info">
+            ⏳ Connecting to Firebase...
+        </div>
+        
+        <h3>Step 1: View Current Template</h3>
+        <button class="btn btn-info" onclick="viewTemplate()">👁️ View Template</button>
+        
+        <h3>Step 2: Reset January 2026 Weeks</h3>
+        <p>This will delete schedule data for Jan 6 (Tue) and Jan 8 (Thu) so the new template applies.</p>
+        
+        <button class="btn btn-danger" onclick="resetWeek('2026-01-06', '2026-01-08')">
+            🗑️ Reset Jan 5-8 Week
+        </button>
+        
+        <button class="btn btn-danger" onclick="resetAllJanuaryWeeks()">
+            🗑️ Reset ALL January 2026 Weeks
+        </button>
+        
+        <button class="btn btn-danger" onclick="resetJanToApril()">
+            🗑️ Reset Jan-April 2026 (Full Season)
+        </button>
+        
+        <div id="output" class="output" style="display:none;"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        let db = null;
+        
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                db = firebase.firestore();
+                document.getElementById('status').innerHTML = '✅ Connected to Firebase';
+                document.getElementById('status').className = 'status success';
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Connection failed: ' + error.message;
+                document.getElementById('status').className = 'status error';
+            }
+        }
+        
+        function showOutput(text) {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.textContent = text;
+        }
+        
+        function appendOutput(text) {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.textContent += text + '\n';
+        }
+        
+        async function viewTemplate() {
+            try {
+                const doc = await db.collection('seasonTemplate').doc('default').get();
+                if (doc.exists) {
+                    showOutput('Current Template:\n' + JSON.stringify(doc.data(), null, 2));
+                } else {
+                    showOutput('No template found!');
+                }
+            } catch (error) {
+                showOutput('Error: ' + error.message);
+            }
+        }
+        
+        async function deleteScheduleDoc(docId) {
+            try {
+                await db.collection('schedules').doc(docId).delete();
+                return true;
+            } catch (error) {
+                console.error('Error deleting ' + docId, error);
+                return false;
+            }
+        }
+        
+        async function resetWeek(tuesdayDate, thursdayDate) {
+            if (!confirm(`Are you sure you want to reset the week with Tuesday ${tuesdayDate} and Thursday ${thursdayDate}?\n\nThis will delete all player data for this week!`)) {
+                return;
+            }
+            
+            document.getElementById('status').innerHTML = '⏳ Resetting week...';
+            document.getElementById('status').className = 'status info';
+            showOutput('Starting reset...\n');
+            
+            const docsToDelete = [
+                `${tuesdayDate}-tuesday-20:00-21:00`,
+                `${tuesdayDate}-tuesday-21:00-22:00`,
+                `${thursdayDate}-thursday-20:00-21:00`,
+                `${thursdayDate}-thursday-21:00-22:00`
+            ];
+            
+            let deleted = 0;
+            for (const docId of docsToDelete) {
+                appendOutput(`Deleting: ${docId}`);
+                const success = await deleteScheduleDoc(docId);
+                if (success) {
+                    deleted++;
+                    appendOutput(`  ✅ Deleted`);
+                } else {
+                    appendOutput(`  ⚠️ Not found or error`);
+                }
+            }
+            
+            appendOutput(`\n✅ Done! Deleted ${deleted} documents.`);
+            appendOutput('\n👉 Now refresh the main app to see new template applied!');
+            
+            document.getElementById('status').innerHTML = `✅ Week reset! ${deleted} sessions deleted. Refresh the main app!`;
+            document.getElementById('status').className = 'status success';
+        }
+        
+        async function resetAllJanuaryWeeks() {
+            if (!confirm('Are you sure you want to reset ALL January 2026 weeks?\n\nThis will delete all schedule data for January!')) {
+                return;
+            }
+            
+            document.getElementById('status').innerHTML = '⏳ Resetting all January weeks...';
+            showOutput('Resetting all January 2026 weeks...\n');
+            
+            // January 2026 Tuesdays: 6, 13, 20, 27
+            // January 2026 Thursdays: 8, 15, 22, 29
+            const weeks = [
+                { tue: '2026-01-06', thu: '2026-01-08' },
+                { tue: '2026-01-13', thu: '2026-01-15' },
+                { tue: '2026-01-20', thu: '2026-01-22' },
+                { tue: '2026-01-27', thu: '2026-01-29' }
+            ];
+            
+            let totalDeleted = 0;
+            
+            for (const week of weeks) {
+                const docsToDelete = [
+                    `${week.tue}-tuesday-20:00-21:00`,
+                    `${week.tue}-tuesday-21:00-22:00`,
+                    `${week.thu}-thursday-20:00-21:00`,
+                    `${week.thu}-thursday-21:00-22:00`
+                ];
+                
+                for (const docId of docsToDelete) {
+                    const success = await deleteScheduleDoc(docId);
+                    if (success) {
+                        totalDeleted++;
+                        appendOutput(`✅ Deleted: ${docId}`);
+                    }
+                }
+            }
+            
+            appendOutput(`\n✅ Done! Deleted ${totalDeleted} documents.`);
+            document.getElementById('status').innerHTML = `✅ All January weeks reset! Refresh the main app!`;
+            document.getElementById('status').className = 'status success';
+        }
+        
+        async function resetJanToApril() {
+            if (!confirm('Are you sure you want to reset ALL weeks from January to April 2026?\n\nThis is a lot of data!')) {
+                return;
+            }
+            
+            document.getElementById('status').innerHTML = '⏳ Resetting Jan-April 2026...';
+            showOutput('Resetting January to April 2026...\n');
+            
+            // Generate all Tuesdays and Thursdays from Jan 2 to Apr 30, 2026
+            const startDate = new Date('2026-01-01');
+            const endDate = new Date('2026-04-30');
+            
+            let totalDeleted = 0;
+            let current = new Date(startDate);
+            
+            while (current <= endDate) {
+                const dayOfWeek = current.getDay();
+                const dateStr = current.toISOString().split('T')[0];
+                
+                // Tuesday = 2, Thursday = 4
+                if (dayOfWeek === 2) {
+                    // Tuesday
+                    for (const time of ['20:00-21:00', '21:00-22:00']) {
+                        const docId = `${dateStr}-tuesday-${time}`;
+                        const success = await deleteScheduleDoc(docId);
+                        if (success) {
+                            totalDeleted++;
+                            appendOutput(`✅ ${docId}`);
+                        }
+                    }
+                } else if (dayOfWeek === 4) {
+                    // Thursday
+                    for (const time of ['20:00-21:00', '21:00-22:00']) {
+                        const docId = `${dateStr}-thursday-${time}`;
+                        const success = await deleteScheduleDoc(docId);
+                        if (success) {
+                            totalDeleted++;
+                            appendOutput(`✅ ${docId}`);
+                        }
+                    }
+                }
+                
+                current.setDate(current.getDate() + 1);
+            }
+            
+            appendOutput(`\n✅ Done! Deleted ${totalDeleted} documents.`);
+            document.getElementById('status').innerHTML = `✅ Full season reset! ${totalDeleted} sessions deleted. Refresh the main app!`;
+            document.getElementById('status').className = 'status success';
+        }
+        
+        init();
+    </script>
+</body>
+</html>

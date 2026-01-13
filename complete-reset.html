@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Complete Season Reset Tool</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        h1 { color: #f59e0b; text-align: center; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .card h2 { color: #38bdf8; margin-top: 0; font-size: 18px; }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-green { background: #10b981; color: white; }
+        .btn-green:hover:not(:disabled) { background: #059669; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-red:hover:not(:disabled) { background: #dc2626; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .btn-blue:hover:not(:disabled) { background: #2563eb; }
+        .btn-purple { background: #8b5cf6; color: white; }
+        .btn-purple:hover:not(:disabled) { background: #7c3aed; }
+        .btn-big {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .status.success { background: #065f46; color: #6ee7b7; }
+        .status.error { background: #7f1d1d; color: #fca5a5; }
+        .status.info { background: #1e3a5f; color: #7dd3fc; }
+        .status.warning { background: #78350f; color: #fcd34d; }
+        .log {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .schedule-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .day-box {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .day-box h3 { color: #38bdf8; margin: 0 0 10px 0; font-size: 14px; }
+        .session { margin: 8px 0; }
+        .session-time { color: #94a3b8; font-size: 12px; }
+        .session-players { color: #e2e8f0; font-size: 13px; margin-top: 3px; }
+        .step { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+        .step-num {
+            background: #334155;
+            color: #94a3b8;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .step-num.done { background: #10b981; color: white; }
+        .step-num.active { background: #f59e0b; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🎾 Complete Season Reset Tool</h1>
+    <p class="subtitle">Set new template + reset weeks for Jan-Apr 2026</p>
+    
+    <div id="status" class="status info">⏳ Connecting to Firebase...</div>
+    
+    <div class="card">
+        <h2>📋 New Template (Jan 2, 2026 → Apr 30, 2026)</h2>
+        <div class="schedule-preview">
+            <div class="day-box">
+                <h3>🔵 TUESDAY (Paša)</h3>
+                <div class="session">
+                    <div class="session-time">20:00-21:00</div>
+                    <div class="session-players">Viktorija, Rita, Nikola, Liza</div>
+                </div>
+                <div class="session">
+                    <div class="session-time">21:00-22:00</div>
+                    <div class="session-players">Karīna, Jūlija, Sintija, Valdis, Līva</div>
+                </div>
+            </div>
+            <div class="day-box">
+                <h3>🟢 THURSDAY (Justīne)</h3>
+                <div class="session">
+                    <div class="session-time">20:00-21:00</div>
+                    <div class="session-players">Agnese, Kristaps, Elza, Aivars, Arta</div>
+                </div>
+                <div class="session">
+                    <div class="session-time">21:00-22:00</div>
+                    <div class="session-players">Edgars, Klāvs, Jānis, Ričards</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>⚡ Quick Actions</h2>
+        
+        <button class="btn btn-green btn-big" onclick="doEverything()">
+            🚀 DO EVERYTHING (Recommended)<br>
+            <small style="font-weight:normal;opacity:0.8">Set template + Delete Jan-Apr weeks + Recreate with new players</small>
+        </button>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+            <button class="btn btn-blue" onclick="viewCurrentTemplate()">👁️ View Current Template</button>
+            <button class="btn btn-blue" onclick="viewSchedules()">📅 View Existing Schedules</button>
+            <button class="btn btn-purple" onclick="setTemplateOnly()">💾 Set Template Only</button>
+            <button class="btn btn-red" onclick="deleteSchedulesOnly()">🗑️ Delete Schedules Only</button>
+            <button class="btn btn-green" onclick="createSchedulesOnly()">➕ Create Schedules Only</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>📝 Log</h2>
+        <div id="log" class="log">Ready...\n</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        let db = null;
+        
+        const NEW_TEMPLATE = {
+            tuesday: {
+                '20:00-21:00': { players: ['Viktorija', 'Rita', 'Nikola', 'Liza'], instructor: 'Paša' },
+                '21:00-22:00': { players: ['Karīna', 'Jūlija', 'Sintija', 'Valdis', 'Līva'], instructor: 'Paša' }
+            },
+            thursday: {
+                '20:00-21:00': { players: ['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'], instructor: 'Justīne' },
+                '21:00-22:00': { players: ['Edgars', 'Klāvs', 'Jānis', 'Ričards'], instructor: 'Justīne' }
+            }
+        };
+        
+        function log(msg) {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent += `[${time}] ${msg}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function setStatus(msg, type = 'info') {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = 'status ' + type;
+        }
+        
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                db = firebase.firestore();
+                setStatus('✅ Connected to Firebase - Ready!', 'success');
+                log('Connected to Firebase');
+            } catch (error) {
+                setStatus('❌ Connection failed: ' + error.message, 'error');
+                log('ERROR: ' + error.message);
+            }
+        }
+        
+        // Generate all dates for Jan-Apr 2026
+        function getSeasonDates() {
+            const dates = [];
+            const start = new Date('2026-01-01');
+            const end = new Date('2026-04-30');
+            let current = new Date(start);
+            
+            while (current <= end) {
+                const dow = current.getDay();
+                if (dow === 2 || dow === 4) { // Tuesday or Thursday
+                    dates.push({
+                        date: current.toISOString().split('T')[0],
+                        day: dow === 2 ? 'tuesday' : 'thursday'
+                    });
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return dates;
+        }
+        
+        async function viewCurrentTemplate() {
+            log('Loading current template...');
+            try {
+                const doc = await db.collection('seasonTemplate').doc('default').get();
+                if (doc.exists) {
+                    log('Current template:\n' + JSON.stringify(doc.data(), null, 2));
+                } else {
+                    log('No template found!');
+                }
+            } catch (e) {
+                log('ERROR: ' + e.message);
+            }
+        }
+        
+        async function viewSchedules() {
+            log('Loading schedules for Jan 2026...');
+            try {
+                const snapshot = await db.collection('schedules')
+                    .where('date', '>=', '2026-01-01')
+                    .where('date', '<=', '2026-01-31')
+                    .get();
+                
+                log(`Found ${snapshot.size} schedule documents:`);
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    log(`  ${doc.id}: ${d.players?.join(', ') || '(empty)'}`);
+                });
+            } catch (e) {
+                log('ERROR: ' + e.message);
+            }
+        }
+        
+        async function setTemplateOnly() {
+            log('Setting new template...');
+            setStatus('⏳ Setting template...', 'info');
+            try {
+                await db.collection('seasonTemplate').doc('default').set({
+                    ...NEW_TEMPLATE,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sourceWeek: '2026-01-02',
+                    seasonStart: '2026-01-02',
+                    seasonEnd: '2026-04-30'
+                });
+                log('✅ Template set!');
+                setStatus('✅ Template set!', 'success');
+            } catch (e) {
+                log('ERROR: ' + e.message);
+                setStatus('❌ Error: ' + e.message, 'error');
+            }
+        }
+        
+        async function deleteSchedulesOnly() {
+            if (!confirm('Delete ALL schedule data for Jan-Apr 2026?')) return;
+            
+            log('Deleting Jan-Apr 2026 schedules...');
+            setStatus('⏳ Deleting schedules...', 'info');
+            
+            try {
+                const dates = getSeasonDates();
+                let deleted = 0;
+                
+                for (const {date, day} of dates) {
+                    for (const time of ['20:00-21:00', '21:00-22:00']) {
+                        const docId = `${date}-${day}-${time}`;
+                        try {
+                            await db.collection('schedules').doc(docId).delete();
+                            deleted++;
+                        } catch (e) {}
+                    }
+                }
+                
+                log(`✅ Deleted ${deleted} schedule documents`);
+                setStatus(`✅ Deleted ${deleted} schedules`, 'success');
+            } catch (e) {
+                log('ERROR: ' + e.message);
+                setStatus('❌ Error: ' + e.message, 'error');
+            }
+        }
+        
+        async function createSchedulesOnly() {
+            log('Creating schedules with new template players...');
+            setStatus('⏳ Creating schedules...', 'info');
+            
+            try {
+                const dates = getSeasonDates();
+                let created = 0;
+                
+                for (const {date, day} of dates) {
+                    for (const time of ['20:00-21:00', '21:00-22:00']) {
+                        const docId = `${date}-${day}-${time}`;
+                        const players = NEW_TEMPLATE[day][time].players;
+                        const instructor = NEW_TEMPLATE[day][time].instructor;
+                        
+                        await db.collection('schedules').doc(docId).set({
+                            date: date,
+                            day: day,
+                            time: time,
+                            players: players,
+                            instructor: instructor,
+                            maxCapacity: 5,
+                            locked: false,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        created++;
+                    }
+                }
+                
+                log(`✅ Created ${created} schedule documents`);
+                setStatus(`✅ Created ${created} schedules`, 'success');
+            } catch (e) {
+                log('ERROR: ' + e.message);
+                setStatus('❌ Error: ' + e.message, 'error');
+            }
+        }
+        
+        async function doEverything() {
+            if (!confirm('This will:\n1. Set new template\n2. Delete ALL Jan-Apr 2026 schedules\n3. Recreate them with new players\n\nContinue?')) return;
+            
+            setStatus('⏳ Running complete reset...', 'info');
+            
+            // Step 1: Set template
+            log('\n=== STEP 1: Setting template ===');
+            await setTemplateOnly();
+            
+            // Step 2: Delete old schedules
+            log('\n=== STEP 2: Deleting old schedules ===');
+            const dates = getSeasonDates();
+            let deleted = 0;
+            
+            for (const {date, day} of dates) {
+                for (const time of ['20:00-21:00', '21:00-22:00']) {
+                    const docId = `${date}-${day}-${time}`;
+                    try {
+                        await db.collection('schedules').doc(docId).delete();
+                        deleted++;
+                    } catch (e) {}
+                }
+            }
+            log(`Deleted ${deleted} documents`);
+            
+            // Step 3: Create new schedules
+            log('\n=== STEP 3: Creating new schedules ===');
+            let created = 0;
+            
+            for (const {date, day} of dates) {
+                for (const time of ['20:00-21:00', '21:00-22:00']) {
+                    const docId = `${date}-${day}-${time}`;
+                    const players = NEW_TEMPLATE[day][time].players;
+                    const instructor = NEW_TEMPLATE[day][time].instructor;
+                    
+                    await db.collection('schedules').doc(docId).set({
+                        date: date,
+                        day: day,
+                        time: time,
+                        players: players,
+                        instructor: instructor,
+                        maxCapacity: 5,
+                        locked: false,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    created++;
+                    
+                    if (created % 20 === 0) {
+                        log(`Created ${created} schedules...`);
+                    }
+                }
+            }
+            
+            log(`\n✅ COMPLETE! Created ${created} schedule documents`);
+            log('\n👉 Now refresh matchpoint.lv to see the new players!');
+            setStatus('🎉 DONE! Refresh matchpoint.lv to see changes!', 'success');
+        }
+        
+        init();
+    </script>
+</body>
+</html>

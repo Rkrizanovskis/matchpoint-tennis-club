@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set New Season Template - Jan-Apr 2026</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2d3748; margin-top: 0; }
+        h2 { color: #4a5568; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #059669; }
+        .btn.danger { background: #ef4444; }
+        .btn.danger:hover { background: #dc2626; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        .session-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .session-card h4 {
+            margin: 0 0 10px 0;
+            color: #3b82f6;
+        }
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .player-tag {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .day-column {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .day-column h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 New Season Template Setup</h1>
+        <p><strong>Season:</strong> January 2, 2026 - End of April 2026</p>
+        
+        <div id="status" class="status info">
+            Connecting to Firebase...
+        </div>
+        
+        <h2>📋 New Schedule Preview</h2>
+        
+        <div class="grid">
+            <div class="day-column">
+                <h3>🔵 Tuesday</h3>
+                
+                <div class="session-card">
+                    <h4>20:00 - 21:00</h4>
+                    <div class="player-list">
+                        <span class="player-tag">Viktorija</span>
+                        <span class="player-tag">Rita</span>
+                        <span class="player-tag">Nikola</span>
+                        <span class="player-tag">Liza</span>
+                    </div>
+                </div>
+                
+                <div class="session-card">
+                    <h4>21:00 - 22:00</h4>
+                    <div class="player-list">
+                        <span class="player-tag">Karīna</span>
+                        <span class="player-tag">Jūlija</span>
+                        <span class="player-tag">Sintija</span>
+                        <span class="player-tag">Valdis</span>
+                        <span class="player-tag">Līva</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-column">
+                <h3>🟢 Thursday</h3>
+                
+                <div class="session-card">
+                    <h4>20:00 - 21:00</h4>
+                    <div class="player-list">
+                        <span class="player-tag">Agnese</span>
+                        <span class="player-tag">Kristaps</span>
+                        <span class="player-tag">Elza</span>
+                        <span class="player-tag">Aivars</span>
+                        <span class="player-tag">Arta</span>
+                    </div>
+                </div>
+                
+                <div class="session-card">
+                    <h4>21:00 - 22:00</h4>
+                    <div class="player-list">
+                        <span class="player-tag">Edgars</span>
+                        <span class="player-tag">Klāvs</span>
+                        <span class="player-tag">Jānis</span>
+                        <span class="player-tag">Ričards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>⚡ Actions</h2>
+        
+        <div>
+            <button class="btn" onclick="viewCurrentTemplate()">
+                👁️ View Current Template
+            </button>
+            <button class="btn" onclick="setNewTemplate()" style="background: #3b82f6;">
+                💾 Set New Template
+            </button>
+            <button class="btn" onclick="verifyTemplate()" style="background: #8b5cf6;">
+                ✅ Verify Template Was Set
+            </button>
+        </div>
+        
+        <div id="output" class="code" style="display: none;"></div>
+    </div>
+
+    <script src="../firebase-config.js"></script>
+    <script>
+        let database = null;
+        
+        // NEW TEMPLATE DATA - January 2026 to April 2026
+        const NEW_TEMPLATE = {
+            tuesday: {
+                '20:00-21:00': {
+                    players: ['Viktorija', 'Rita', 'Nikola', 'Liza'],
+                    instructor: 'Paša'
+                },
+                '21:00-22:00': {
+                    players: ['Karīna', 'Jūlija', 'Sintija', 'Valdis', 'Līva'],
+                    instructor: 'Paša'
+                }
+            },
+            thursday: {
+                '20:00-21:00': {
+                    players: ['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'],
+                    instructor: 'Justīne'
+                },
+                '21:00-22:00': {
+                    players: ['Edgars', 'Klāvs', 'Jānis', 'Ričards'],
+                    instructor: 'Justīne'
+                }
+            }
+        };
+        
+        // Initialize Firebase
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                database = firebase.firestore();
+                updateStatus('✅ Connected to Firebase - Ready to update template', 'success');
+                console.log('Firebase initialized');
+            } catch (error) {
+                updateStatus('❌ Failed to connect: ' + error.message, 'error');
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+        
+        function showOutput(data) {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        }
+        
+        // View current template
+        async function viewCurrentTemplate() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Loading current template...', 'info');
+            
+            try {
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                
+                if (templateDoc.exists) {
+                    const template = templateDoc.data();
+                    updateStatus('✅ Current template loaded', 'success');
+                    showOutput(template);
+                } else {
+                    updateStatus('⚠️ No template currently set', 'warning');
+                    showOutput({ message: 'No template exists yet' });
+                }
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Set the new template
+        async function setNewTemplate() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to set the new template?\n\nThis will apply to all future weeks starting January 2, 2026.')) {
+                return;
+            }
+            
+            updateStatus('⏳ Setting new template...', 'info');
+            
+            try {
+                const templateData = {
+                    ...NEW_TEMPLATE,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sourceWeek: '2026-01-02',
+                    seasonStart: '2026-01-02',
+                    seasonEnd: '2026-04-30',
+                    description: 'January - April 2026 Season'
+                };
+                
+                await database.collection('seasonTemplate').doc('default').set(templateData);
+                
+                updateStatus('✅ New template set successfully! Season: Jan 2 - Apr 30, 2026', 'success');
+                showOutput({
+                    message: 'Template saved!',
+                    data: templateData
+                });
+                console.log('New template set:', templateData);
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Verify the template was set correctly
+        async function verifyTemplate() {
+            if (!database) {
+                updateStatus('❌ Not connected to Firebase', 'error');
+                return;
+            }
+            
+            updateStatus('⏳ Verifying template...', 'info');
+            
+            try {
+                const templateDoc = await database.collection('seasonTemplate').doc('default').get();
+                
+                if (!templateDoc.exists) {
+                    updateStatus('❌ No template found!', 'error');
+                    return;
+                }
+                
+                const template = templateDoc.data();
+                let issues = [];
+                
+                // Check Tuesday 20:00
+                const tue20 = template.tuesday?.['20:00-21:00']?.players || [];
+                if (JSON.stringify(tue20.sort()) !== JSON.stringify(['Viktorija', 'Rita', 'Nikola', 'Liza'].sort())) {
+                    issues.push('Tuesday 20:00 players mismatch');
+                }
+                
+                // Check Tuesday 21:00
+                const tue21 = template.tuesday?.['21:00-22:00']?.players || [];
+                if (JSON.stringify(tue21.sort()) !== JSON.stringify(['Karīna', 'Jūlija', 'Sintija', 'Valdis', 'Līva'].sort())) {
+                    issues.push('Tuesday 21:00 players mismatch');
+                }
+                
+                // Check Thursday 20:00
+                const thu20 = template.thursday?.['20:00-21:00']?.players || [];
+                if (JSON.stringify(thu20.sort()) !== JSON.stringify(['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'].sort())) {
+                    issues.push('Thursday 20:00 players mismatch');
+                }
+                
+                // Check Thursday 21:00
+                const thu21 = template.thursday?.['21:00-22:00']?.players || [];
+                if (JSON.stringify(thu21.sort()) !== JSON.stringify(['Edgars', 'Klāvs', 'Jānis', 'Ričards'].sort())) {
+                    issues.push('Thursday 21:00 players mismatch');
+                }
+                
+                if (issues.length === 0) {
+                    updateStatus('✅ Template verified! All sessions match expected players.', 'success');
+                    showOutput({
+                        status: 'VERIFIED',
+                        seasonStart: template.seasonStart,
+                        seasonEnd: template.seasonEnd,
+                        sessions: {
+                            'Tuesday 20:00': tue20,
+                            'Tuesday 21:00': tue21,
+                            'Thursday 20:00': thu20,
+                            'Thursday 21:00': thu21
+                        }
+                    });
+                } else {
+                    updateStatus('⚠️ Template verification found issues', 'warning');
+                    showOutput({
+                        status: 'ISSUES FOUND',
+                        issues: issues,
+                        currentTemplate: template
+                    });
+                }
+            } catch (error) {
+                updateStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

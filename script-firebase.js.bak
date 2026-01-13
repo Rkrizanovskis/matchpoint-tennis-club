@@ -962,7 +962,7 @@ function createTimeSlotHTML(day, time, date) {
                     const player = players.find(p => p.id === playerId);
                     const removeX = isPast ? '' : '<span class="remove-x">×</span>';
                     const clickAction = isPast ? '' : `onclick="removePlayer('${day}', '${time}', '${playerId}'); event.stopPropagation();" title="Click to remove player"`;
-                    if (player) { return `<span class="player-tag ${player.skillLevel}" ${clickAction}>${player.name}${removeX}</span>`; } else { return `<span class="player-tag unknown" ${clickAction}>⚠️ Unknown: ${playerId.substring(0,15)}...${removeX}</span>`; }
+                    return player ? `<span class="player-tag ${player.skillLevel}" ${clickAction}>${player.name}${removeX}</span>` : '';
                 }).join('')}
             </div>
             ${isAvailable && !isPast ? '<button class="add-player-btn">+ Add Player</button>' : ''}

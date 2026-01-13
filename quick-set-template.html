@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 QUICK: Set New Template - Jan-Apr 2026</title>
+    
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 { color: #2d3748; margin-top: 0; text-align: center; }
+        .big-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            width: 100%;
+            margin: 20px 0;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .big-btn:hover { transform: scale(1.02); }
+        .big-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+        .status {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .schedule-preview {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .day-row {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+        }
+        .day-label {
+            font-weight: bold;
+            width: 120px;
+            color: #3b82f6;
+        }
+        .time-label {
+            background: #e0e7ff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .players {
+            color: #4b5563;
+            font-size: 14px;
+        }
+        .output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 Set New Season Template</h1>
+        <p style="text-align: center; color: #6b7280;">January 2, 2026 → End of April 2026</p>
+        
+        <div id="status" class="status info">
+            ⏳ Connecting to Firebase...
+        </div>
+        
+        <div class="schedule-preview">
+            <strong>📅 New Schedule:</strong>
+            <div class="day-row">
+                <span class="day-label">Tuesday 20:00</span>
+                <span class="players">Viktorija, Rita, Nikola, Liza</span>
+            </div>
+            <div class="day-row">
+                <span class="day-label">Tuesday 21:00</span>
+                <span class="players">Karīna, Jūlija, Sintija, Valdis, Līva</span>
+            </div>
+            <div class="day-row">
+                <span class="day-label">Thursday 20:00</span>
+                <span class="players">Agnese, Kristaps, Elza, Aivars, Arta</span>
+            </div>
+            <div class="day-row">
+                <span class="day-label">Thursday 21:00</span>
+                <span class="players">Edgars, Klāvs, Jānis, Ričards</span>
+            </div>
+        </div>
+        
+        <button id="setBtn" class="big-btn" onclick="setNewTemplate()" disabled>
+            🚀 SET NEW TEMPLATE NOW
+        </button>
+        
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        let db = null;
+        
+        // New template
+        const NEW_TEMPLATE = {
+            tuesday: {
+                '20:00-21:00': {
+                    players: ['Viktorija', 'Rita', 'Nikola', 'Liza'],
+                    instructor: 'Paša'
+                },
+                '21:00-22:00': {
+                    players: ['Karīna', 'Jūlija', 'Sintija', 'Valdis', 'Līva'],
+                    instructor: 'Paša'
+                }
+            },
+            thursday: {
+                '20:00-21:00': {
+                    players: ['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'],
+                    instructor: 'Justīne'
+                },
+                '21:00-22:00': {
+                    players: ['Edgars', 'Klāvs', 'Jānis', 'Ričards'],
+                    instructor: 'Justīne'
+                }
+            },
+            sourceWeek: '2026-01-02',
+            seasonStart: '2026-01-02',
+            seasonEnd: '2026-04-30',
+            description: 'January - April 2026 Season'
+        };
+        
+        async function init() {
+            try {
+                await firebase.auth().signInAnonymously();
+                db = firebase.firestore();
+                document.getElementById('status').innerHTML = '✅ Connected! Click the button to set the new template.';
+                document.getElementById('status').className = 'status success';
+                document.getElementById('setBtn').disabled = false;
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Connection failed: ' + error.message;
+                document.getElementById('status').className = 'status error';
+            }
+        }
+        
+        async function setNewTemplate() {
+            const btn = document.getElementById('setBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Setting template...';
+            
+            try {
+                const templateData = {
+                    ...NEW_TEMPLATE,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('seasonTemplate').doc('default').set(templateData);
+                
+                document.getElementById('status').innerHTML = '🎉 SUCCESS! New template is now active!';
+                document.getElementById('status').className = 'status success';
+                btn.textContent = '✅ TEMPLATE SET!';
+                btn.style.background = '#059669';
+                
+                // Show output
+                const output = document.getElementById('output');
+                output.style.display = 'block';
+                output.textContent = 'Template saved:\n' + JSON.stringify(templateData, null, 2);
+                
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
+                document.getElementById('status').className = 'status error';
+                btn.disabled = false;
+                btn.textContent = '🚀 SET NEW TEMPLATE NOW';
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
