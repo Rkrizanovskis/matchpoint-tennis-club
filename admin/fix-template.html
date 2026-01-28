@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Template - Use Player IDs</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 900px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2d3748; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        .btn:hover { background: #2563eb; }
+        .btn.success { background: #10b981; }
+        .status { padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 11px; max-height: 500px; }
+        .player-map { background: #f0fdf4; padding: 10px; margin: 5px 0; border-radius: 4px; font-family: monospace; font-size: 12px; }
+        .missing { background: #fef2f2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Template - Map Names to Player IDs</h1>
+        <p>The template was saved with names instead of IDs. This will fix it.</p>
+        
+        <div id="status" class="status info">Connecting to Firebase...</div>
+        
+        <div>
+            <button class="btn" onclick="loadPlayers()">1️⃣ Load Players from Firebase</button>
+            <button class="btn success" onclick="fixTemplateAndApply()">2️⃣ Fix Template & Apply to All Weeks</button>
+        </div>
+        
+        <h3>Player Name → ID Mapping:</h3>
+        <div id="mapping"></div>
+        
+        <pre id="output" style="display:none;"></pre>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let playerMap = {}; // name -> id
+        let allPlayers = [];
+        
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                document.getElementById('status').textContent = '✅ Connected';
+                document.getElementById('status').className = 'status success';
+            })
+            .catch(e => {
+                document.getElementById('status').textContent = '❌ Error: ' + e.message;
+                document.getElementById('status').className = 'status error';
+            });
+        
+        async function loadPlayers() {
+            document.getElementById('status').textContent = '⏳ Loading players...';
+            document.getElementById('status').className = 'status info';
+            
+            const snapshot = await db.collection('players').get();
+            allPlayers = [];
+            playerMap = {};
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const id = doc.id;
+                const name = data.name || id;
+                allPlayers.push({ id, name, data });
+                
+                // Map by various name formats
+                playerMap[name] = id;
+                playerMap[name.toLowerCase()] = id;
+                // Handle "Kristīne S." style names
+                if (name.includes(' ')) {
+                    const shortName = name.split(' ')[0];
+                    if (!playerMap[shortName]) playerMap[shortName] = id;
+                }
+            });
+            
+            // Show mapping
+            const mappingHtml = allPlayers.map(p => 
+                `<div class="player-map">${p.name} → <strong>${p.id}</strong></div>`
+            ).join('');
+            document.getElementById('mapping').innerHTML = mappingHtml;
+            
+            document.getElementById('status').textContent = `✅ Loaded ${allPlayers.length} players`;
+            document.getElementById('status').className = 'status success';
+            
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('output').textContent = JSON.stringify(playerMap, null, 2);
+        }
+        
+        function findPlayerId(name) {
+            // Try exact match first
+            if (playerMap[name]) return playerMap[name];
+            if (playerMap[name.toLowerCase()]) return playerMap[name.toLowerCase()];
+            
+            // Try partial match
+            const nameLower = name.toLowerCase();
+            for (const [key, id] of Object.entries(playerMap)) {
+                if (key.toLowerCase().includes(nameLower) || nameLower.includes(key.toLowerCase())) {
+                    return id;
+                }
+            }
+            
+            // Search in full player list
+            for (const p of allPlayers) {
+                if (p.name.toLowerCase().includes(nameLower) || nameLower.includes(p.name.toLowerCase())) {
+                    return p.id;
+                }
+            }
+            
+            return null;
+        }
+        
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function getWeekMonday(weekOffset) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (weekOffset * 7));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        async function fixTemplateAndApply() {
+            if (allPlayers.length === 0) {
+                alert('Please load players first!');
+                return;
+            }
+            
+            document.getElementById('status').textContent = '⏳ Fixing template...';
+            document.getElementById('status').className = 'status info';
+            
+            // Define template with names, then convert to IDs
+            const templateWithNames = {
+                tuesday: {
+                    '20:00-21:00': { players: ['Viktorija', 'Nikola', 'Liza', 'Kristīne S.'], instructor: 'Paša' },
+                    '21:00-22:00': { players: ['Karina', 'Jūlija', 'Sintija', 'Līva', 'Rita'], instructor: 'Paša' }
+                },
+                thursday: {
+                    '20:00-21:00': { players: ['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'], instructor: 'Justīne' },
+                    '21:00-22:00': { players: ['Edgars', 'Klāvs', 'Jānis', 'Ričards'], instructor: 'Justīne' }
+                }
+            };
+            
+            // Convert names to IDs
+            const templateWithIds = { tuesday: {}, thursday: {} };
+            const missingPlayers = [];
+            
+            for (const day of ['tuesday', 'thursday']) {
+                for (const time of ['20:00-21:00', '21:00-22:00']) {
+                    const slot = templateWithNames[day][time];
+                    const playerIds = [];
+                    
+                    for (const name of slot.players) {
+                        const id = findPlayerId(name);
+                        if (id) {
+                            playerIds.push(id);
+                        } else {
+                            missingPlayers.push(name);
+                        }
+                    }
+                    
+                    templateWithIds[day][time] = {
+                        players: playerIds,
+                        instructor: slot.instructor
+                    };
+                }
+            }
+            
+            if (missingPlayers.length > 0) {
+                alert('Warning: Could not find IDs for: ' + missingPlayers.join(', '));
+            }
+            
+            // Save fixed template
+            await db.collection('seasonTemplate').doc('default').set({
+                ...templateWithIds,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                seasonStart: '2026-02-01',
+                seasonEnd: '2026-04-30',
+                description: 'Feb-Apr 2026 (fixed with player IDs)'
+            });
+            
+            console.log('Template saved:', templateWithIds);
+            
+            // Apply to all future weeks
+            document.getElementById('status').textContent = '⏳ Applying to future weeks...';
+            
+            const batch = db.batch();
+            let count = 0;
+            
+            for (let w = 0; w < 14; w++) {
+                const monday = getWeekMonday(w);
+                const tuesday = new Date(monday);
+                tuesday.setDate(monday.getDate() + 1);
+                const thursday = new Date(monday);
+                thursday.setDate(monday.getDate() + 3);
+                
+                const tueDate = formatDate(tuesday);
+                const thuDate = formatDate(thursday);
+                
+                if (tueDate > '2026-04-30') break;
+                
+                const sessions = [
+                    { date: tueDate, day: 'tuesday', time: '20:00-21:00', instructor: 'Paša' },
+                    { date: tueDate, day: 'tuesday', time: '21:00-22:00', instructor: 'Paša' },
+                    { date: thuDate, day: 'thursday', time: '20:00-21:00', instructor: 'Justīne' },
+                    { date: thuDate, day: 'thursday', time: '21:00-22:00', instructor: 'Justīne' }
+                ];
+                
+                for (const s of sessions) {
+                    const sessionId = `${s.date}-${s.day}-${s.time}`;
+                    const templatePlayers = templateWithIds[s.day]?.[s.time]?.players || [];
+                    
+                    const docRef = db.collection('schedules').doc(sessionId);
+                    batch.set(docRef, {
+                        date: s.date,
+                        day: s.day,
+                        time: s.time,
+                        instructor: s.instructor,
+                        players: templatePlayers,
+                        maxCapacity: 5,
+                        locked: false,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    count++;
+                }
+            }
+            
+            await batch.commit();
+            
+            document.getElementById('status').textContent = `✅ Fixed! Template saved and applied to ${count} sessions. Refresh main page!`;
+            document.getElementById('status').className = 'status success';
+            
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('output').textContent = 'Fixed Template (with IDs):\n' + JSON.stringify(templateWithIds, null, 2);
+        }
+    </script>
+</body>
+</html>

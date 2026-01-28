@@ -379,12 +379,13 @@ async function initializeAppWithLoading() {
     document.getElementById('mainApp').style.display = 'block';
     
     // Show announcement banner after app loads
-    setTimeout(() => {
-        const banner = document.getElementById('announcementBanner');
-        if (banner) {
-            banner.style.display = 'block';
-        }
-    }, 500);
+    // DISABLED - tournament banner removed
+    // setTimeout(() => {
+    //     const banner = document.getElementById('announcementBanner');
+    //     if (banner) {
+    //         banner.style.display = 'block';
+    //     }
+    // }, 500);
     
     console.log('✅ App initialized successfully with loading screen');
 }

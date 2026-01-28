@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Current Week as Template</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2d3748; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        .btn:hover { background: #2563eb; }
+        .btn.success { background: #10b981; }
+        .status { padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .day { background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .day h3 { margin-top: 0; color: #1e40af; }
+        .session { background: white; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .players { display: flex; flex-wrap: wrap; gap: 5px; }
+        .player { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 15px; font-size: 13px; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px; }
+        .season-info { background: #fef3c7; padding: 15px; border-radius: 8px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 Save Current Week as Template</h1>
+        
+        <div class="season-info">
+            <strong>📅 Season:</strong> February 1, 2026 → April 30, 2026
+        </div>
+        
+        <div id="status" class="status info">Connecting to Firebase...</div>
+        
+        <h2>📋 New Template Preview</h2>
+        <div class="grid">
+            <div class="day">
+                <h3>Tuesday (Paša)</h3>
+                <div class="session">
+                    <strong>20:00-21:00</strong>
+                    <div class="players">
+                        <span class="player">Viktorija</span>
+                        <span class="player">Nikola</span>
+                        <span class="player">Liza</span>
+                        <span class="player">Kristīne S.</span>
+                    </div>
+                </div>
+                <div class="session">
+                    <strong>21:00-22:00</strong>
+                    <div class="players">
+                        <span class="player">Karina</span>
+                        <span class="player">Jūlija</span>
+                        <span class="player">Sintija</span>
+                        <span class="player">Līva</span>
+                        <span class="player">Rita</span>
+                    </div>
+                </div>
+            </div>
+            <div class="day">
+                <h3>Thursday (Justīne)</h3>
+                <div class="session">
+                    <strong>20:00-21:00</strong>
+                    <div class="players">
+                        <span class="player">Agnese</span>
+                        <span class="player">Kristaps</span>
+                        <span class="player">Elza</span>
+                        <span class="player">Aivars</span>
+                        <span class="player">Arta</span>
+                    </div>
+                </div>
+                <div class="session">
+                    <strong>21:00-22:00</strong>
+                    <div class="players">
+                        <span class="player">Edgars</span>
+                        <span class="player">Klāvs</span>
+                        <span class="player">Jānis</span>
+                        <span class="player">Ričards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn success" onclick="saveTemplate()">💾 Save as Template</button>
+        <button class="btn" onclick="viewCurrent()">👁️ View Current Template</button>
+        
+        <pre id="output" style="display:none;"></pre>
+    </div>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        // Initialize
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.firestore();
+        
+        const NEW_TEMPLATE = {
+            tuesday: {
+                '20:00-21:00': {
+                    players: ['Viktorija', 'Nikola', 'Liza', 'Kristīne S.'],
+                    instructor: 'Paša'
+                },
+                '21:00-22:00': {
+                    players: ['Karina', 'Jūlija', 'Sintija', 'Līva', 'Rita'],
+                    instructor: 'Paša'
+                }
+            },
+            thursday: {
+                '20:00-21:00': {
+                    players: ['Agnese', 'Kristaps', 'Elza', 'Aivars', 'Arta'],
+                    instructor: 'Justīne'
+                },
+                '21:00-22:00': {
+                    players: ['Edgars', 'Klāvs', 'Jānis', 'Ričards'],
+                    instructor: 'Justīne'
+                }
+            }
+        };
+        
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                document.getElementById('status').textContent = '✅ Connected - Ready to save template';
+                document.getElementById('status').className = 'status success';
+            })
+            .catch(e => {
+                document.getElementById('status').textContent = '❌ Error: ' + e.message;
+                document.getElementById('status').className = 'status error';
+            });
+        
+        async function saveTemplate() {
+            if (!confirm('Save this schedule as the default template for Feb-Apr 2026?')) return;
+            
+            document.getElementById('status').textContent = '⏳ Saving...';
+            document.getElementById('status').className = 'status info';
+            
+            try {
+                await database.collection('seasonTemplate').doc('default').set({
+                    ...NEW_TEMPLATE,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    sourceWeek: '2026-02-03',
+                    seasonStart: '2026-02-01',
+                    seasonEnd: '2026-04-30',
+                    description: 'Feb-Apr 2026 Season Template'
+                });
+                
+                document.getElementById('status').textContent = '✅ Template saved for Feb-Apr 2026!';
+                document.getElementById('status').className = 'status success';
+                
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('output').textContent = JSON.stringify(NEW_TEMPLATE, null, 2);
+            } catch (e) {
+                document.getElementById('status').textContent = '❌ Error: ' + e.message;
+                document.getElementById('status').className = 'status error';
+            }
+        }
+        
+        async function viewCurrent() {
+            try {
+                const doc = await database.collection('seasonTemplate').doc('default').get();
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('output').textContent = doc.exists 
+                    ? JSON.stringify(doc.data(), null, 2)
+                    : 'No template exists yet';
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

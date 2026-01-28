@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Template to Future Weeks</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 900px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2d3748; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        .btn:hover { background: #2563eb; }
+        .btn.success { background: #10b981; }
+        .btn.danger { background: #ef4444; }
+        .status { padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .status.info { background: #dbeafe; color: #1e40af; }
+        .status.warning { background: #fef3c7; color: #92400e; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 12px; max-height: 400px; }
+        .week-card { background: #f8fafc; padding: 10px 15px; margin: 5px 0; border-radius: 6px; border-left: 4px solid #3b82f6; }
+        .week-card.updated { border-left-color: #10b981; background: #ecfdf5; }
+        .week-card.skipped { border-left-color: #f59e0b; background: #fffbeb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 Apply Template to Future Weeks</h1>
+        <p>This will update all future week schedules (Feb-Apr 2026) with the saved template.</p>
+        
+        <div id="status" class="status info">Connecting to Firebase...</div>
+        
+        <div>
+            <button class="btn" onclick="previewChanges()">👁️ Preview Changes</button>
+            <button class="btn success" onclick="applyTemplate()">✅ Apply Template to Future Weeks</button>
+            <button class="btn danger" onclick="deleteAndRecreate()">🔄 Delete & Recreate Future Weeks</button>
+        </div>
+        
+        <div id="weeks"></div>
+        <pre id="output" style="display:none;"></pre>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                document.getElementById('status').textContent = '✅ Connected - Ready';
+                document.getElementById('status').className = 'status success';
+            })
+            .catch(e => {
+                document.getElementById('status').textContent = '❌ Error: ' + e.message;
+                document.getElementById('status').className = 'status error';
+            });
+        
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function getWeekMonday(weekOffset) {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (weekOffset * 7));
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        async function getTemplate() {
+            const doc = await db.collection('seasonTemplate').doc('default').get();
+            return doc.exists ? doc.data() : null;
+        }
+        
+        async function previewChanges() {
+            document.getElementById('status').textContent = '⏳ Loading...';
+            document.getElementById('status').className = 'status info';
+            
+            const template = await getTemplate();
+            if (!template) {
+                document.getElementById('status').textContent = '❌ No template found!';
+                document.getElementById('status').className = 'status error';
+                return;
+            }
+            
+            const weeksHtml = [];
+            const today = formatDate(new Date());
+            
+            // Check next 12 weeks
+            for (let w = 0; w < 12; w++) {
+                const monday = getWeekMonday(w);
+                const tuesday = new Date(monday);
+                tuesday.setDate(monday.getDate() + 1);
+                const thursday = new Date(monday);
+                thursday.setDate(monday.getDate() + 3);
+                
+                const tueDate = formatDate(tuesday);
+                const thuDate = formatDate(thursday);
+                
+                if (tueDate > '2026-04-30') break;
+                
+                const sessions = [
+                    { date: tueDate, day: 'tuesday', time: '20:00-21:00' },
+                    { date: tueDate, day: 'tuesday', time: '21:00-22:00' },
+                    { date: thuDate, day: 'thursday', time: '20:00-21:00' },
+                    { date: thuDate, day: 'thursday', time: '21:00-22:00' }
+                ];
+                
+                let weekInfo = `<strong>Week ${w}: ${tueDate} - ${thuDate}</strong><br>`;
+                
+                for (const s of sessions) {
+                    const sessionId = `${s.date}-${s.day}-${s.time}`;
+                    const doc = await db.collection('schedules').doc(sessionId).get();
+                    const current = doc.exists ? (doc.data().players || []) : [];
+                    const templatePlayers = template[s.day]?.[s.time]?.players || [];
+                    
+                    const match = JSON.stringify(current.sort()) === JSON.stringify(templatePlayers.sort());
+                    weekInfo += `${s.day} ${s.time}: ${current.length} players ${match ? '✅' : '⚠️ needs update'}<br>`;
+                }
+                
+                weeksHtml.push(`<div class="week-card">${weekInfo}</div>`);
+            }
+            
+            document.getElementById('weeks').innerHTML = weeksHtml.join('');
+            document.getElementById('status').textContent = '✅ Preview loaded';
+            document.getElementById('status').className = 'status success';
+            
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('output').textContent = 'Template:\n' + JSON.stringify(template, null, 2);
+        }
+        
+        async function applyTemplate() {
+            if (!confirm('Apply template to ALL future weeks? This will overwrite current player lists.')) return;
+            
+            document.getElementById('status').textContent = '⏳ Applying template...';
+            document.getElementById('status').className = 'status info';
+            
+            const template = await getTemplate();
+            if (!template) {
+                document.getElementById('status').textContent = '❌ No template found!';
+                document.getElementById('status').className = 'status error';
+                return;
+            }
+            
+            const batch = db.batch();
+            let count = 0;
+            const today = formatDate(new Date());
+            
+            for (let w = 0; w < 12; w++) {
+                const monday = getWeekMonday(w);
+                const tuesday = new Date(monday);
+                tuesday.setDate(monday.getDate() + 1);
+                const thursday = new Date(monday);
+                thursday.setDate(monday.getDate() + 3);
+                
+                const tueDate = formatDate(tuesday);
+                const thuDate = formatDate(thursday);
+                
+                if (tueDate > '2026-04-30') break;
+                if (tueDate < today) continue; // Skip past dates
+                
+                const sessions = [
+                    { date: tueDate, day: 'tuesday', time: '20:00-21:00', instructor: 'Paša' },
+                    { date: tueDate, day: 'tuesday', time: '21:00-22:00', instructor: 'Paša' },
+                    { date: thuDate, day: 'thursday', time: '20:00-21:00', instructor: 'Justīne' },
+                    { date: thuDate, day: 'thursday', time: '21:00-22:00', instructor: 'Justīne' }
+                ];
+                
+                for (const s of sessions) {
+                    const sessionId = `${s.date}-${s.day}-${s.time}`;
+                    const templatePlayers = template[s.day]?.[s.time]?.players || [];
+                    
+                    const docRef = db.collection('schedules').doc(sessionId);
+                    batch.set(docRef, {
+                        date: s.date,
+                        day: s.day,
+                        time: s.time,
+                        instructor: s.instructor,
+                        players: templatePlayers,
+                        maxCapacity: 5,
+                        locked: false,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: false });
+                    count++;
+                }
+            }
+            
+            await batch.commit();
+            document.getElementById('status').textContent = `✅ Applied template to ${count} sessions!`;
+            document.getElementById('status').className = 'status success';
+        }
+        
+        async function deleteAndRecreate() {
+            if (!confirm('DELETE all future schedules and recreate from template? This cannot be undone!')) return;
+            if (!confirm('Are you REALLY sure? All customizations will be lost.')) return;
+            
+            document.getElementById('status').textContent = '⏳ Deleting and recreating...';
+            document.getElementById('status').className = 'status warning';
+            
+            // Same as applyTemplate but delete first
+            await applyTemplate();
+        }
+    </script>
+</body>
+</html>
