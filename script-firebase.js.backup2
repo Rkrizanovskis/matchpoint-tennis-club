@@ -21,96 +21,6 @@ window.closePlayerModal = closePlayerModal;
 window.savePlayer = savePlayer;
 window.saveSeasonTemplate = saveSeasonTemplate;
 window.getSeasonTemplate = getSeasonTemplate;
-window.cleanupGhostPlayer = cleanupGhostPlayer;
-window.viewTemplate = viewTemplate;
-window.cleanupTemplate = cleanupTemplate;
-
-// TEMP: Cleanup function for ghost player
-async function cleanupGhostPlayer() {
-    const playerId = prompt('Enter player ID to remove from Tuesday 20:00-21:00:', 'kristines_1768246441500');
-    if (!playerId) return;
-    
-    if (!confirm(`Remove "${playerId}" from Tuesday 20:00-21:00 slot?`)) return;
-    
-    try {
-        await removePlayer('tuesday', '20:00-21:00', playerId);
-        alert('✅ Player removed! Refresh the page.');
-    } catch (e) {
-        alert('Error: ' + e.message);
-    }
-}
-
-// View season template
-async function viewTemplate() {
-    if (!firebaseEnabled || !database) {
-        alert('Firebase not connected');
-        return;
-    }
-    const template = await getSeasonTemplate();
-    console.log('Season Template:', template);
-    alert('Season Template (check console for full details):\n\n' + 
-        'Tuesday 20:00: ' + JSON.stringify(template?.tuesday?.['20:00-21:00']?.players || []) + '\n' +
-        'Tuesday 21:00: ' + JSON.stringify(template?.tuesday?.['21:00-22:00']?.players || []) + '\n' +
-        'Thursday 20:00: ' + JSON.stringify(template?.thursday?.['20:00-21:00']?.players || []) + '\n' +
-        'Thursday 21:00: ' + JSON.stringify(template?.thursday?.['21:00-22:00']?.players || []));
-}
-
-// Cleanup template - remove a player ID from all slots
-async function cleanupTemplate() {
-    const playerId = 'kristines_1768246441500'; // Hardcoded for now
-    
-    if (!firebaseEnabled || !database) {
-        console.error('Firebase not connected');
-        return;
-    }
-    
-    try {
-        console.log('🧹 Starting cleanup for:', playerId);
-        
-        // 1. Clean up season template
-        const templateDoc = await database.collection('seasonTemplate').doc('default').get();
-        if (templateDoc.exists) {
-            const template = templateDoc.data();
-            let removedFromTemplate = false;
-            
-            ['tuesday', 'thursday'].forEach(day => {
-                ['20:00-21:00', '21:00-22:00'].forEach(time => {
-                    if (template[day] && template[day][time] && template[day][time].players) {
-                        const idx = template[day][time].players.indexOf(playerId);
-                        if (idx > -1) {
-                            template[day][time].players.splice(idx, 1);
-                            removedFromTemplate = true;
-                            console.log(`✅ Removed from template ${day} ${time}`);
-                        }
-                    }
-                });
-            });
-            
-            if (removedFromTemplate) {
-                await database.collection('seasonTemplate').doc('default').set(template);
-                console.log('✅ Template saved!');
-            }
-        }
-        
-        // 2. Clean up ALL schedule documents that contain this player
-        console.log('🔍 Searching schedules for ghost player...');
-        const schedulesSnapshot = await database.collection('schedules').get();
-        
-        for (const doc of schedulesSnapshot.docs) {
-            const data = doc.data();
-            if (data.players && data.players.includes(playerId)) {
-                const newPlayers = data.players.filter(p => p !== playerId);
-                await database.collection('schedules').doc(doc.id).update({ players: newPlayers });
-                console.log(`✅ Removed from schedule: ${doc.id}`);
-            }
-        }
-        
-        console.log('🎉 CLEANUP COMPLETE! Refresh the page now.');
-        
-    } catch (e) {
-        console.error('Error:', e.message);
-    }
-}
 
 // App State
 let isAuthenticated = false;
@@ -663,13 +573,6 @@ async function confirmBooking() {
                 }
                 
                 // Check if player is already booked
-                console.log('🔍 DEBUG - Checking booking:');
-                console.log('  Selected Player ID:', selectedPlayerId);
-                console.log('  Current Players in slot:', currentPlayers);
-                console.log('  Session ID:', sessionId);
-                console.log('  Includes check result:', currentPlayers.includes(selectedPlayerId));
-                
-                // Check if player is already booked
                 if (currentPlayers.includes(selectedPlayerId)) {
                     throw new Error('This player is already booked for this slot');
                 }
@@ -901,11 +804,7 @@ function getSessionId(date, day, time) {
 }
 
 function formatDateForId(date) {
-    // Use local date components to avoid timezone issues
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return date.toISOString().split('T')[0];
 }
 
 function getWeekStartDate(weekOffset = 0) {

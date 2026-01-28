@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        body { font-family: monospace; background: #1a1a2e; color: #eee; padding: 20px; }
+        pre { background: #0f0f1a; padding: 15px; border-radius: 8px; overflow: auto; }
+        h2 { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Firebase Debug</h1>
+    <div id="output">Loading...</div>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB-qLLcm3_oKk1soGsSQui38dM-9M8BN14",
+            authDomain: "matchpoint-e5b00.firebaseapp.com",
+            projectId: "matchpoint-e5b00",
+            storageBucket: "matchpoint-e5b00.firebasestorage.app",
+            messagingSenderId: "145208722794",
+            appId: "1:145208722794:web:b6f46e386445321019d113"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        
+        async function debug() {
+            await firebase.auth().signInAnonymously();
+            const db = firebase.firestore();
+            let html = '';
+            
+            // Get ALL players
+            html += '<h2>All Players in Firebase:</h2><pre>';
+            const players = await db.collection('players').get();
+            const playerMap = {};
+            players.forEach(doc => {
+                playerMap[doc.id] = doc.data().name;
+                html += `${doc.id} => "${doc.data().name}" (${doc.data().skillLevel})\n`;
+            });
+            html += '</pre>';
+            
+            // Check for any player with "Kristīne" or "kristine"
+            html += '<h2>Players containing "Krist":</h2><pre>';
+            players.forEach(doc => {
+                if (doc.data().name.toLowerCase().includes('krist')) {
+                    html += `ID: ${doc.id} => Name: "${doc.data().name}"\n`;
+                }
+            });
+            html += '</pre>';
+            
+            // Get Tuesday 20:00 schedule for this week
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysUntilTuesday = (2 - dayOfWeek + 7) % 7;
+            const tuesday = new Date(today);
+            tuesday.setDate(today.getDate() + daysUntilTuesday);
+            const tuesdayStr = tuesday.toISOString().split('T')[0];
+            
+            html += `<h2>Tuesday ${tuesdayStr} 20:00 Schedule:</h2><pre>`;
+            const docId = `${tuesdayStr}-tuesday-20:00-21:00`;
+            const scheduleDoc = await db.collection('schedules').doc(docId).get();
+            
+            if (scheduleDoc.exists) {
+                const data = scheduleDoc.data();
+                html += `Doc ID: ${docId}\n`;
+                html += `Players array: ${JSON.stringify(data.players)}\n\n`;
+                html += `Resolved names:\n`;
+                (data.players || []).forEach((pid, i) => {
+                    const name = playerMap[pid] || '⚠️ UNKNOWN';
+                    html += `  [${i}] ${pid} => ${name}\n`;
+                });
+            } else {
+                html += 'No schedule found for this date';
+            }
+            html += '</pre>';
+            
+            document.getElementById('output').innerHTML = html;
+        }
+        
+        debug();
+    </script>
+</body>
+</html>
