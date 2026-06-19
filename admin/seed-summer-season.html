@@ -32,6 +32,12 @@
     <button id="btnWeeks" class="danger">Rebuild current + next 3 weeks</button>
   </div>
 
+  <div class="card">
+    <h3>Step 3 — Fill the whole season <span class="muted">(safe)</span></h3>
+    <p class="hint">Pre-creates the schedule for every week from now through <strong>31 Dec</strong>, using the template. Only fills weeks/slots that don't exist yet — it <strong>never</strong> overwrites an existing booking. Run Step 1 first.</p>
+    <button id="btnFill">Fill weeks through end of year</button>
+  </div>
+
   <div id="log">Ready.</div>
 
   <script type="module">
@@ -104,6 +110,46 @@
           log(`✅ Rebuilt week ${offset} (starting ${fmtId(weekStart(offset))}).`, 'ok');
         }
         log('Done. Reload the main app to see it.', 'muted');
+      } catch (e) { log('❌ ' + e.message, 'err'); }
+      btn.disabled = false;
+    });
+
+    document.getElementById('btnFill').addEventListener('click', async () => {
+      if (!ready) return log('Not connected yet — wait a moment.', 'err');
+      const btn = document.getElementById('btnFill'); btn.disabled = true;
+      try {
+        // Prefer the saved template; fall back to the bundled default.
+        const tSnap = await getDoc(doc(db, 'seasonTemplate', 'default'));
+        const template = tSnap.exists() ? tSnap.data() : DEFAULT_TEMPLATE;
+        const endOfYear = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59);
+        let created = 0, weeks = 0;
+        log('Filling weeks through ' + endOfYear.getFullYear() + '-12-31 ...');
+        for (let offset = 0; offset < 60; offset++) {
+          const ws = weekStart(offset);
+          if (ws > endOfYear) break;
+          weeks++;
+          const batch = writeBatch(db);
+          let wrote = 0;
+          for (const day of BOOKABLE_DAYS) {
+            const dateStr = fmtId(dateForDay(offset, day));
+            for (const time of TIME_SLOTS) {
+              if (slotNote(day, time)) continue;
+              const ref = doc(db, 'schedules', `${dateStr}-${day}-${time}`);
+              const snap = await getDoc(ref);
+              if (!snap.exists()) {
+                batch.set(ref, {
+                  date: dateStr, day, time, instructor: DAYS[day].instructor,
+                  players: template[day]?.[time]?.players || [],
+                  maxCapacity: MAX_CAPACITY, locked: false, lastUpdated: serverTimestamp()
+                });
+                wrote++; created++;
+              }
+            }
+          }
+          if (wrote) await batch.commit();
+          log(`Week ${offset} (${fmtId(ws)}): +${wrote} slot(s)`, wrote ? 'ok' : 'muted');
+        }
+        log(`✅ Done. Created ${created} slot(s) across ${weeks} weeks (existing bookings untouched).`, 'ok');
       } catch (e) { log('❌ ' + e.message, 'err'); }
       btn.disabled = false;
     });

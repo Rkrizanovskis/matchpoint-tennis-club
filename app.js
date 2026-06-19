@@ -33,14 +33,15 @@ let unsubPlayers = null;
 let unsubSchedule = null;
 let unsubMessages = null;
 
+// Small helpers driven by the season config.
+// (Declared before resetScheduleSkeleton() runs below — they're used inside it.)
+const dayOffset = (day) => DAYS[day].offset;
+const instructorFor = (day) => DAYS[day].instructor;
+
 // ---- Data ------------------------------------------------------------------
 let players = DEFAULT_PLAYERS.map((p) => ({ ...p }));
 let schedule = {};
 resetScheduleSkeleton();
-
-// Small helpers driven by the season config.
-const dayOffset = (day) => DAYS[day].offset;
-const instructorFor = (day) => DAYS[day].instructor;
 
 // Rebuild the in-memory schedule for the current week to a known empty state.
 function resetScheduleSkeleton() {
