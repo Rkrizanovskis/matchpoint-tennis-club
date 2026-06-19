@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seed Summer Season — Matchpoint Admin</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #1f2933; }
+    h1 { font-size: 1.4rem; }
+    .card { border: 1px solid #e3e8ef; border-radius: 12px; padding: 20px; margin: 16px 0; }
+    button { font-size: 1rem; padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; background: #4f68cc; color: #fff; }
+    button.danger { background: #e25563; }
+    button:disabled { opacity: .5; cursor: default; }
+    #log { background: #0f172a; color: #cbd5e1; font: 13px/1.5 ui-monospace, monospace; padding: 14px; border-radius: 8px; white-space: pre-wrap; min-height: 80px; margin-top: 16px; }
+    .ok { color: #5fd08a; } .err { color: #ff8b8b; } .muted { color: #94a3b8; }
+    .hint { color: #52606d; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <h1>🎾 Seed Summer 2026 Season</h1>
+  <p class="hint">Writes the current roster and weekly template (from <code>season-config.js</code>) into Firestore so it becomes the live default. Run this once.</p>
+
+  <div class="card">
+    <h3>Step 1 — Roster + template <span class="muted">(safe)</span></h3>
+    <p class="hint">Adds/updates all players and saves the weekly template. Does <strong>not</strong> touch existing bookings.</p>
+    <button id="btnRoster">Write roster + template</button>
+  </div>
+
+  <div class="card">
+    <h3>Step 2 — Apply template to weeks <span class="muted">(overwrites bookings)</span></h3>
+    <p class="hint">Rebuilds the schedule for the current week + the next 3 weeks from the template. This <strong>replaces</strong> any bookings already made in those weeks. Use after Step 1 if you want the template visible immediately.</p>
+    <button id="btnWeeks" class="danger">Rebuild current + next 3 weeks</button>
+  </div>
+
+  <div id="log">Ready.</div>
+
+  <script type="module">
+    import { db, firebaseReady, collection, doc, setDoc, getDoc, writeBatch, serverTimestamp }
+      from '../firebase-init.js';
+    import { DEFAULT_PLAYERS, DEFAULT_TEMPLATE, BOOKABLE_DAYS, TIME_SLOTS, DAYS, MAX_CAPACITY, slotNote }
+      from '../season-config.js';
+
+    const logEl = document.getElementById('log');
+    const log = (msg, cls = '') => { logEl.innerHTML += `\n<span class="${cls}">${msg}</span>`; logEl.scrollTop = logEl.scrollHeight; };
+
+    // — date helpers (kept in sync with app.js) —
+    const fmtId = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    function weekStart(offset = 0) {
+      const t = new Date(), dow = t.getDay(), diff = (dow === 0 ? -6 : 1) - dow;
+      const m = new Date(t); m.setDate(t.getDate() + diff + offset * 7); m.setHours(0,0,0,0); return m;
+    }
+    const dateForDay = (offset, day) => { const d = weekStart(offset); d.setDate(d.getDate() + DAYS[day].offset); return d; };
+
+    let ready = false;
+    firebaseReady.then(() => { ready = true; log('✅ Connected to Firebase.', 'ok'); })
+      .catch((e) => log('❌ Could not connect: ' + e.message, 'err'));
+
+    document.getElementById('btnRoster').addEventListener('click', async () => {
+      if (!ready) return log('Not connected yet — wait a moment.', 'err');
+      const btn = document.getElementById('btnRoster'); btn.disabled = true;
+      try {
+        log('Writing ' + DEFAULT_PLAYERS.length + ' players...');
+        const batch = writeBatch(db);
+        DEFAULT_PLAYERS.forEach((p) => batch.set(doc(db, 'players', p.id),
+          { name: p.name, skillLevel: p.skillLevel, createdAt: serverTimestamp() }, { merge: true }));
+        await batch.commit();
+        log('✅ Players written.', 'ok');
+
+        const template = {};
+        BOOKABLE_DAYS.forEach((day) => {
+          template[day] = {};
+          TIME_SLOTS.forEach((time) => {
+            if (slotNote(day, time)) return;
+            template[day][time] = { players: DEFAULT_TEMPLATE[day]?.[time]?.players || [], instructor: DAYS[day].instructor };
+          });
+        });
+        await setDoc(doc(db, 'seasonTemplate', 'default'), { ...template, createdAt: serverTimestamp(), sourceWeek: fmtId(weekStart(0)) });
+        log('✅ Season template saved.', 'ok');
+        log('Done. New/future weeks will now use this template automatically.', 'muted');
+      } catch (e) { log('❌ ' + e.message, 'err'); }
+      btn.disabled = false;
+    });
+
+    document.getElementById('btnWeeks').addEventListener('click', async () => {
+      if (!ready) return log('Not connected yet — wait a moment.', 'err');
+      if (!confirm('This overwrites bookings for the current week and the next 3 weeks with the template. Continue?')) return;
+      const btn = document.getElementById('btnWeeks'); btn.disabled = true;
+      try {
+        for (let offset = 0; offset <= 3; offset++) {
+          const batch = writeBatch(db);
+          BOOKABLE_DAYS.forEach((day) => {
+            const dateStr = fmtId(dateForDay(offset, day));
+            TIME_SLOTS.forEach((time) => {
+              if (slotNote(day, time)) return;
+              const id = `${dateStr}-${day}-${time}`;
+              batch.set(doc(db, 'schedules', id), {
+                date: dateStr, day, time, instructor: DAYS[day].instructor,
+                players: DEFAULT_TEMPLATE[day]?.[time]?.players || [],
+                maxCapacity: MAX_CAPACITY, locked: false, lastUpdated: serverTimestamp()
+              });
+            });
+          });
+          await batch.commit();
+          log(`✅ Rebuilt week ${offset} (starting ${fmtId(weekStart(offset))}).`, 'ok');
+        }
+        log('Done. Reload the main app to see it.', 'muted');
+      } catch (e) { log('❌ ' + e.message, 'err'); }
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>

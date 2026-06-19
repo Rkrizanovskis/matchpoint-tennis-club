@@ -1,3 +1,4 @@
+/* ===== styles.css ===== */
 * {
     margin: 0;
     padding: 0;
@@ -1654,4 +1655,1237 @@ canvas {
 body > canvas {
     z-index: -1 !important;
     position: fixed !important;
+}
+
+/* ===== modal-styles.css ===== */
+/* Beautiful Tennis Club Modal Styles */
+
+/* Override the basic modal with tennis club styling */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(45, 55, 72, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    animation: modalFadeIn 0.3s ease-out;
+    /* Always center the modal content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal[style*="display: none"] {
+    display: none !important;
+}
+
+.modal[style*="display: flex"], 
+.modal[style*="display: block"] {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 
+        0 20px 60px rgba(90, 122, 217, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Beautiful header with tennis club branding */
+.modal-header {
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+    color: white;
+    padding: 24px 28px 20px;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%);
+    background-size: 20px 20px;
+    animation: slidePattern 20s linear infinite;
+}
+
+@keyframes slidePattern {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(0); }
+}
+
+.modal-header h3 {
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h3::before {
+    content: '🎾';
+    font-size: 20px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 2;
+}
+
+.close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+}
+
+.close:active {
+    transform: scale(0.95);
+}
+
+/* Modal body styling */
+.modal-body {
+    padding: 28px;
+}
+
+.slot-details h4 {
+    color: #2d3748;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 2px solid #0ea5e9;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e8f4f8;
+    border-radius: 12px;
+    font-size: 16px;
+    background: #f8fffe;
+    color: #2d3748;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #5A7AD9;
+    box-shadow: 0 0 0 4px rgba(90, 122, 217, 0.1);
+    background: white;
+}
+
+/* Current players section */
+.current-players h5 {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.current-players-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.current-players-list .player-tag {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.current-players-list .player-tag.beginner {
+    background: linear-gradient(135deg, #FEFFC4 0%, #FFF8B8 100%);
+    color: #4A3300;
+    border-color: rgba(255, 222, 99, 0.3);
+}
+
+.current-players-list .player-tag.regular {
+    background: linear-gradient(135deg, #E8F0FF 0%, #DCE7FF 100%);
+    color: #1E3A8A;
+    border-color: rgba(121, 158, 255, 0.3);
+}
+
+.current-players-list .player-tag .remove-x {
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0.6;
+    margin-left: 2px;
+    transition: opacity 0.2s ease;
+}
+
+.current-players-list .player-tag:hover .remove-x {
+    opacity: 1;
+    color: #dc2626;
+}
+
+.current-players-list .player-tag.beginner .remove-x:hover {
+    color: #b91c1c;
+}
+
+.current-players-list .player-tag.regular .remove-x:hover {
+    color: #b91c1c;
+}
+
+/* Modal footer */
+.modal-footer {
+    padding: 0 28px 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-footer .btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+}
+
+.modal-footer .btn.secondary {
+    background: #f8fafc;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+}
+
+.modal-footer .btn.secondary:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.modal-footer .btn:not(.secondary) {
+    background: linear-gradient(135deg, #FFBC4C 0%, #FFB84D 100%);
+    color: #2d3748;
+    box-shadow: 0 4px 16px rgba(255, 188, 76, 0.3);
+}
+
+.modal-footer .btn:not(.secondary):hover {
+    background: linear-gradient(135deg, #FFB84D 0%, #FFBC4C 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 188, 76, 0.4);
+}
+
+.modal-footer .btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px;
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        padding: 20px 24px 16px;
+    }
+    
+    .modal-header h3 {
+        font-size: 20px;
+    }
+    
+    .modal-body {
+        padding: 24px 20px;
+    }
+    
+    .modal-footer {
+        padding: 0 20px 20px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 16px 24px;
+        min-width: auto;
+    }
+    
+    .form-group select {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 16px 18px;
+    }
+}
+/* ===== booking-loading.css ===== */
+/* Beautiful Loading States for Tennis Club Booking */
+
+/* Loading button states */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    color: white;
+}
+
+.btn.loading.secondary::after {
+    color: #64748b;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tennis-themed loading spinner */
+.tennis-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tennis-ball-spinner {
+    font-size: 16px;
+    animation: bounce 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    60% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Modal loading overlay */
+.modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    text-align: center;
+    color: #2d3748;
+}
+
+.loading-content .tennis-ball-spinner {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.loading-content .loading-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4F68CC;
+}
+
+.loading-content .loading-subtext {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Success animation */
+.booking-success {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+}
+
+.booking-success.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+@keyframes successPop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Disabled form state */
+.form-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-disabled select,
+.form-disabled input {
+    background-color: #f8fafc !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+}
+
+/* Error state */
+.booking-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 12px;
+    display: none;
+    animation: slideInError 0.3s ease-out;
+}
+
+.booking-error.show {
+    display: block;
+}
+
+@keyframes slideInError {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile loading adjustments */
+@media (max-width: 768px) {
+    .btn.loading::after {
+        width: 18px;
+        height: 18px;
+        margin-left: -9px;
+        margin-top: -9px;
+    }
+    
+    .loading-content .tennis-ball-spinner {
+        font-size: 28px;
+    }
+    
+    .loading-content .loading-text {
+        font-size: 15px;
+    }
+    
+    .booking-success {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+}
+/* ===== club-wall-styles.css ===== */
+/* Club Wall Message Modal Styles */
+#messageModal .modal-content {
+    max-width: 500px;
+    width: 90%;
+}
+
+#messageModal .form-group {
+    margin-bottom: 16px;
+}
+
+#messageModal .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+}
+
+#messageModal input,
+#messageModal textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+#messageModal input:focus,
+#messageModal textarea:focus {
+    outline: none;
+    border-color: #5A7AD9;
+    box-shadow: 0 0 0 3px rgba(90, 122, 217, 0.1);
+}
+
+#messageModal textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.char-count {
+    text-align: right;
+    margin-top: 4px;
+}
+
+.char-count span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Club Messages Container */
+.messages-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.club-message {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.club-message:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.message-author {
+    font-weight: 600;
+    color: #5A7AD9;
+    font-size: 14px;
+}
+
+.message-time {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.message-content {
+    color: #2d3748;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* No Messages State */
+.no-messages {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.no-messages-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.no-messages-text {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.no-messages-subtitle {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    #messageModal .modal-content {
+        width: 95%;
+        margin: 20px auto;
+    }
+    
+    .messages-container {
+        max-height: 300px;
+    }
+    
+    .club-message {
+        padding: 12px;
+    }
+    
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .no-messages {
+        padding: 30px 16px;
+    }
+    
+    .no-messages-icon {
+        font-size: 36px;
+    }
+}
+
+/* Scrollbar Styling for Messages Container */
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animation for new messages */
+.club-message {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* ===== main-club-wall-styles.css ===== */
+/* Main Page Club Wall Styles */
+.club-wall-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin: 24px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.club-wall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.club-wall-header h2 {
+    color: #2d3748;
+    font-size: 24px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.club-wall-header .btn {
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(90, 122, 217, 0.3);
+}
+
+.club-wall-header .btn:hover {
+    background: linear-gradient(135deg, #4F68CC 0%, #3E5BA9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(90, 122, 217, 0.4);
+}
+
+/* Messages container specific to main page */
+.club-wall-section .messages-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+/* Enhanced message cards for main page */
+.club-wall-section .club-message {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.club-wall-section .club-message::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(135deg, #5A7AD9 0%, #4F68CC 100%);
+}
+
+.club-wall-section .club-message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-color: #5A7AD9;
+}
+
+.club-wall-section .message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.club-wall-section .message-author {
+    font-weight: 700;
+    color: #5A7AD9;
+    font-size: 15px;
+}
+
+.club-wall-section .message-time {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.club-wall-section .message-content {
+    color: #2d3748;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Enhanced no messages state */
+.club-wall-section .no-messages {
+    text-align: center;
+    padding: 48px 24px;
+    color: #64748b;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+.club-wall-section .no-messages-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.club-wall-section .no-messages-text {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.club-wall-section .no-messages-subtitle {
+    font-size: 15px;
+    opacity: 0.8;
+}
+
+/* Mobile responsive for main club wall */
+@media (max-width: 768px) {
+    .club-wall-section {
+        margin: 16px;
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+    
+    .club-wall-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .club-wall-header h2 {
+        font-size: 20px;
+    }
+    
+    .club-wall-header .btn {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+    
+    .club-wall-section .messages-container {
+        max-height: 400px;
+    }
+    
+    .club-wall-section .club-message {
+        padding: 16px;
+    }
+    
+    .club-wall-section .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .club-wall-section .no-messages {
+        padding: 32px 16px;
+    }
+    
+    .club-wall-section .no-messages-icon {
+        font-size: 42px;
+    }
+}
+
+/* Scrollbar styling for main club wall */
+.club-wall-section .messages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.club-wall-section .messages-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animation for new messages on main page */
+.club-wall-section .club-message {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Integration with main app layout */
+.main-content .club-wall-section {
+    max-width: 1200px;
+    margin: 24px auto;
+}
+
+/* Ensure proper spacing after schedule */
+.schedule-grid + .club-wall-section {
+    margin-top: 32px;
+}
+/* ===== instructor-styles.css ===== */
+/* Instructor Information Styles - Inline with Day Title */
+.day-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.day-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.instructor-inline {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b7280;
+    opacity: 0.85;
+}
+
+/* Update day card to accommodate instructor */
+.day-card {
+    min-height: 200px; /* Further reduced since instructor info is now inline */
+}
+
+.day-header {
+    background: white;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px 12px;
+}
+
+/* Mobile responsive instructor info */
+@media (max-width: 768px) {
+    .day-title {
+        font-size: 16px;
+    }
+    
+    .instructor-inline {
+        font-size: 10px;
+    }
+    
+    .day-card {
+        min-height: 200px;
+    }
+}
+
+/* Enhanced Tuesday/Thursday styling - Inline */
+.day-card[data-day="tuesday"] .instructor-inline {
+    color: #047857;
+}
+
+.day-card[data-day="thursday"] .instructor-inline {
+    color: #6d28d9;
+}
+
+/* Unavailable days styling */
+.unavailable-text {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.day-card[data-day="monday"] .unavailable-text,
+.day-card[data-day="wednesday"] .unavailable-text {
+    color: #6b7280;
+}
+
+/* Style the entire Monday and Wednesday cards as unavailable */
+.day-card[data-day="monday"],
+.day-card[data-day="wednesday"] {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    opacity: 0.85;
+    position: relative;
+}
+
+.day-card[data-day="monday"]::after,
+.day-card[data-day="wednesday"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.1) 10px,
+        rgba(255,255,255,0.1) 20px
+    );
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.day-card[data-day="monday"] .day-header,
+.day-card[data-day="wednesday"] .day-header {
+    background: transparent;
+}
+
+.day-card[data-day="monday"] .skill-legend,
+.day-card[data-day="wednesday"] .skill-legend {
+    opacity: 0.5;
+}
+
+.day-card[data-day="monday"]:hover,
+.day-card[data-day="wednesday"]:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+/* ===== loading-styles.css ===== */
+/* Loading Screen Styles */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.loading-logo h1 {
+    margin: 1rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.tennis-ball-bounce {
+    font-size: 3rem;
+    animation: bounce 1.5s infinite ease-in-out;
+    display: inline-block;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -30px, 0);
+    }
+    70% {
+        transform: translate3d(0, -15px, 0);
+    }
+    90% {
+        transform: translate3d(0, -4px, 0);
+    }
+}
+
+.loading-message {
+    margin: 2rem 0;
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+    opacity: 1;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-steps {
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.step {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    opacity: 1;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin: 0.3rem 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.step.active {
+    opacity: 1;
+    transform: translateX(10px);
+    color: #FFD700;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #FFD700;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.step.completed {
+    opacity: 1;
+    color: #00FF88;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #00FF88;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.step.completed::after {
+    content: " ✓";
+    color: #90EE90;
+    margin-left: auto;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .loading-content {
+        padding: 1rem;
+        max-width: 300px;
+    }
+    
+    .loading-logo h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tennis-ball-bounce {
+        font-size: 2.5rem;
+    }
+    
+    .loading-text {
+        font-size: 1rem;
+    }
 }

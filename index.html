@@ -7,18 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Matchpoint Tennis Club - Member Portal</title>
-    <link rel="stylesheet" href="styles.css?v=2025-09-05-remove-x">
-    <link rel="stylesheet" href="modal-styles.css?v=2025-09-05-remove-x">
-    <link rel="stylesheet" href="booking-loading.css">
-    <link rel="stylesheet" href="club-wall-styles.css">
-    <link rel="stylesheet" href="main-club-wall-styles.css">
-    <link rel="stylesheet" href="instructor-styles.css">
-    <link rel="stylesheet" href="loading-styles.css">
-    
-    <!-- Firebase SDK v8 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- All styles bundled into one request (generated from the 7 source .css files) -->
+    <link rel="stylesheet" href="bundle.css?v=2026-06-19-summer">
+
+    <!-- Firebase is loaded as ES modules from firebase-init.js (v10 modular SDK) -->
 </head>
 <body>
     <!-- Login Form -->
@@ -84,7 +76,6 @@
                     <div class="admin-header">
                         <h4>Players Management</h4>
                         <button class="btn" onclick="showAddPlayer()">Add Player</button>
-                        <button class="btn" onclick="cleanupTemplate()" style="background: #e74c3c; margin-left: 10px;">🧹 Fix Template</button>
                     </div>
                     <div class="players-grid" id="playersGrid">
                         <!-- Players will be loaded here -->
@@ -197,10 +188,10 @@
         </div>
     </div>
 
-    <!-- Firebase Config -->
-    <script src="firebase-config.js?v=2025-09-05-fix-cache"></script>
-    
-    <!-- Main Script -->
-    <script src="script-firebase.js?v=2026-01-18-v3"></script>
+    <!-- Confetti for club-wall celebrations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js" defer></script>
+
+    <!-- App logic (ES module; imports Firebase v10 modular SDK via firebase-init.js) -->
+    <script type="module" src="app.js?v=2026-06-19-v10"></script>
 </body>
 </html>
