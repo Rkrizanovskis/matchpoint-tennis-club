@@ -24,10 +24,8 @@ export const BOOKABLE_DAYS = Object.keys(DAYS).filter((d) => DAYS[d].available);
 export const MAX_CAPACITY = 5;
 
 // Informational, non-bookable slots: `${day}|${time}` -> note text.
-// Thursday 20:00 is individual / reserve lessons with Paša, booked ahead.
-export const SLOT_NOTES = {
-  'thursday|20:00-21:00': 'Individuālās vai rezervistu nodarbības ar Pašu (jāpiesaka vismaz pāris dienas pirms).'
-};
+// (None right now — Thursday 20:00 is a normal bookable slot.)
+export const SLOT_NOTES = {};
 
 // Default roster — one entry per real person. Players who train twice a week
 // (e.g. Karīna, Liza, Viktorija, Nikola, Kristīna Š.) appear once here and are

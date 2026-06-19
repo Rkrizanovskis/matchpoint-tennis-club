@@ -44,7 +44,7 @@
     import { db, firebaseReady, collection, doc, setDoc, getDoc, writeBatch, serverTimestamp }
       from '../firebase-init.js';
     import { DEFAULT_PLAYERS, DEFAULT_TEMPLATE, BOOKABLE_DAYS, TIME_SLOTS, DAYS, MAX_CAPACITY, slotNote }
-      from '../season-config.js';
+      from '../season-config.js?v=2026-06-19-thu';
 
     const logEl = document.getElementById('log');
     const log = (msg, cls = '') => { logEl.innerHTML += `\n<span class="${cls}">${msg}</span>`; logEl.scrollTop = logEl.scrollHeight; };

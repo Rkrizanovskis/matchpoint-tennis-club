@@ -18,7 +18,7 @@ import {
 import {
   TIME_SLOTS, DAYS, RENDER_DAYS, BOOKABLE_DAYS, MAX_CAPACITY,
   DEFAULT_PLAYERS, DEFAULT_TEMPLATE, slotNote
-} from './season-config.js';
+} from './season-config.js?v=2026-06-19-thu';
 
 console.log('Tennis app (Firebase v10 modular) loading...');
 
